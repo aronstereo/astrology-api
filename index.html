@@ -1,0 +1,1518 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Astrology Engine - Dashboard & Sinastría Profesional</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .pdf-export-mode { background-color: #ffffff !important; color: #0f172a !important; padding: 20px !important; }
+        .pdf-export-mode .bg-slate-800\/50, .pdf-export-mode .bg-slate-900\/60, .pdf-export-mode .bg-slate-950\/40 { background-color: #f8fafc !important; border-color: #e2e8f0 !important; color: #0f172a !important; }
+        .pdf-export-mode text { fill: #0f172a !important; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans">
+
+    <!-- Header / Navbar -->
+    <header class="border-b border-slate-800 bg-slate-950/80 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center flex-wrap gap-3">
+            <div class="flex items-center space-x-3">
+                <span class="text-2xl">✨</span>
+                <h1 class="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
+                    Astrology Engine
+                </h1>
+            </div>
+            <div class="flex items-center gap-2">
+                <!-- Selector de Idioma -->
+                <div class="flex items-center gap-1.5 bg-slate-800/80 px-2.5 py-1 rounded-lg border border-slate-700">
+                    <span class="text-xs">🌐</span>
+                    <select id="langSwitch" onchange="changeLanguage(this.value)" class="bg-slate-900 text-slate-200 text-xs rounded px-1.5 py-0.5 outline-none border border-slate-700 cursor-pointer">
+                        <option value="es" selected>Español</option>
+                        <option value="en">English</option>
+                        <option value="it">Italiano</option>
+                        <option value="fr">Français</option>
+                        <option value="pt">Português</option>
+                    </select>
+                </div>
+
+                <div id="action-buttons" class="hidden flex items-center gap-2">
+                    <button onclick="handleWhatsAppAction()" class="text-xs bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition font-medium shadow">
+                        <span>WhatsApp</span>
+                    </button>
+                    <button onclick="handlePdfAction()" class="text-xs bg-purple-600 hover:bg-purple-500 text-white px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition font-medium shadow">
+                        <span>PDF</span>
+                    </button>
+                </div>
+                <div id="status-badge" class="flex items-center space-x-2 text-xs px-3 py-1 rounded-full bg-emerald-950/50 text-emerald-400 border border-emerald-800/50">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                    <span data-i18n="apiConnected">API Conectada</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 py-8" id="report-content">
+
+        <!-- Tabs Navigation -->
+        <div class="flex border-b border-slate-800 mb-8 space-x-2 overflow-x-auto" id="nav-tabs">
+            <button onclick="switchTab('chart')" id="tab-btn-chart" class="px-5 py-3 font-medium text-sm border-b-2 border-purple-500 text-purple-400 transition-all whitespace-nowrap">
+                📊 <span data-i18n="tabChart">Carta Natal</span>
+            </button>
+            <button onclick="switchTab('synastry')" id="tab-btn-synastry" class="px-5 py-3 font-medium text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-all whitespace-nowrap">
+                💞 <span data-i18n="tabSynastry">Sinastría de Pareja</span>
+            </button>
+            <button onclick="switchTab('transits')" id="tab-btn-transits" class="px-5 py-3 font-medium text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-all whitespace-nowrap">
+                🌟 <span data-i18n="tabTransits">Tránsitos Actuales</span>
+            </button>
+            <button onclick="switchTab('history')" id="tab-btn-history" class="px-5 py-3 font-medium text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-all whitespace-nowrap">
+                📁 <span data-i18n="tabHistory">Historial Guardado</span>
+            </button>
+            <button onclick="switchTab('raw')" id="tab-btn-raw" class="px-5 py-3 font-medium text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-all whitespace-nowrap">
+                🛠️ <span data-i18n="tabRaw">Respuesta JSON</span>
+            </button>
+        </div>
+
+        <!-- TAB 1: CARTA NATAL -->
+        <div id="tab-chart" class="tab-content active">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <!-- Formulario Carta Natal -->
+                <div class="bg-slate-800/50 border border-slate-700/50 p-6 rounded-2xl shadow-xl h-fit" id="form-container">
+                    <h2 class="text-lg font-semibold text-slate-200 mb-4 flex items-center gap-2">
+                        <span>🗓️</span> <span data-i18n="birthDataTitle">Datos de Nacimiento</span>
+                    </h2>
+                    <form id="chart-form" onsubmit="handleCalculate(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-400 mb-1" data-i18n="labelName">Nombre / Identificador</label>
+                            <input type="text" id="person-name" value="" data-i18n-placeholder="placeholderName" placeholder="Nombre o Identificador" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-purple-500 mb-2">
+                            
+                            <label class="block text-xs font-medium text-slate-400 mb-1" data-i18n="labelDate">Fecha (Año, Mes, Día)</label>
+                            <div class="grid grid-cols-3 gap-2">
+                                <input type="number" id="year" value="" data-i18n-placeholder="placeholderYear" placeholder="Año" required class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-purple-500">
+                                <input type="number" id="month" value="" data-i18n-placeholder="placeholderMonth" placeholder="Mes" min="1" max="12" required class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-purple-500">
+                                <input type="number" id="day" value="" data-i18n-placeholder="placeholderDay" placeholder="Día" min="1" max="31" required class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-purple-500">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-400 mb-1" data-i18n="labelTime">Hora Local (HH:MM)</label>
+                                <input type="time" id="time-local" value="" onchange="updateUtcCalculation()" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-purple-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-400 mb-1" data-i18n="labelTimezone">Zona Horaria (UTC)</label>
+                                <select id="utc-offset" onchange="updateUtcCalculation()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-2 text-sm text-slate-200 focus:outline-none focus:border-purple-500">
+                                    <option value="-12">-12:00</option>
+                                    <option value="-11">-11:00</option>
+                                    <option value="-10">-10:00 (Hawaii)</option>
+                                    <option value="-9">-09:00 (Alaska)</option>
+                                    <option value="-8">-08:00 (Pacífico)</option>
+                                    <option value="-7">-07:00 (Montaña)</option>
+                                    <option value="-6">-06:00 (C. América)</option>
+                                    <option value="-5">-05:00 (Bogotá, Lima)</option>
+                                    <option value="-4" selected>-04:00 (Caracas, La Paz)</option>
+                                    <option value="-4.5">-04:30 (Vzla histórico)</option>
+                                    <option value="-3">-03:00 (Bs. As., Santiago)</option>
+                                    <option value="-2">-02:00</option>
+                                    <option value="-1">-01:00</option>
+                                    <option value="0">UTC +00:00 (Londres)</option>
+                                    <option value="1">+01:00 (Madrid, París)</option>
+                                    <option value="2">+02:00 (Atenas, El Cairo)</option>
+                                    <option value="3">+03:00 (Moscú, Riad)</option>
+                                    <option value="4">+04:00</option>
+                                    <option value="5">+05:00</option>
+                                    <option value="6">+06:00</option>
+                                    <option value="7">+07:00 (Bangkok)</option>
+                                    <option value="8">+08:00 (Pekín)</option>
+                                    <option value="9">+09:00 (Tokio)</option>
+                                    <option value="10">+10:00 (Sídney)</option>
+                                    <option value="11">+11:00</option>
+                                    <option value="12">+12:00</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="bg-purple-950/40 p-2.5 rounded-lg border border-purple-800/50 flex justify-between items-center text-xs">
+                            <span class="text-slate-400" data-i18n="labelUtcCalculated">Hora UTC Calculada:</span>
+                            <span id="utc-calculated-display" class="font-mono text-purple-300 font-bold">--:-- UTC</span>
+                        </div>
+
+                        <div class="relative">
+                            <label class="block text-xs font-medium text-slate-400 mb-1" data-i18n="labelCity">Ciudad / Lugar de Nacimiento</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="city-search" value="" data-i18n-placeholder="placeholderCity" placeholder="Ej: Barinas, Venezuela" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-purple-500">
+                                <button type="button" onclick="searchLocation()" class="bg-slate-700 hover:bg-slate-600 px-3 py-2 rounded-lg text-xs font-medium transition-colors">🔍</button>
+                            </div>
+                            <div id="city-results" class="hidden absolute left-0 right-0 top-full mt-1 bg-slate-900 border border-slate-700 rounded-lg shadow-2xl z-50 max-h-40 overflow-y-auto text-xs"></div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 text-xs bg-slate-950/40 p-2.5 rounded-lg border border-slate-800">
+                            <div>
+                                <span class="text-slate-500 block" data-i18n="labelLatitude">Latitud:</span>
+                                <span id="lat-val" class="font-mono text-purple-400">8.6200</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-500 block" data-i18n="labelLongitude">Longitud:</span>
+                                <span id="lon-val" class="font-mono text-purple-400">-70.2000</span>
+                            </div>
+                        </div>
+
+                        <button type="submit" id="btn-submit" class="w-full mt-4 bg-purple-600 hover:bg-purple-500 text-white font-medium py-2.5 rounded-lg transition-colors shadow-lg shadow-purple-600/30 flex justify-center items-center gap-2">
+                            <span data-i18n="btnCalculateChart">Calcular Carta Natal</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Resultados -->
+                <div class="lg:col-span-2 space-y-6">
+                    <div id="angles-card" class="hidden bg-slate-800/40 border border-slate-700/50 p-4 rounded-2xl grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+                            <span class="text-[10px] uppercase font-bold text-slate-400 block" data-i18n="angleAsc">Ascendente (AC)</span>
+                            <span id="ang-asc" class="text-sm font-semibold text-purple-300">-</span>
+                        </div>
+                        <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+                            <span class="text-[10px] uppercase font-bold text-slate-400 block" data-i18n="angleMc">Medio Cielo (MC)</span>
+                            <span id="ang-mc" class="text-sm font-semibold text-pink-300">-</span>
+                        </div>
+                        <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+                            <span class="text-[10px] uppercase font-bold text-slate-400 block" data-i18n="angleDc">Descendente (DC)</span>
+                            <span id="ang-dc" class="text-sm font-semibold text-slate-300">-</span>
+                        </div>
+                        <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+                            <span class="text-[10px] uppercase font-bold text-slate-400 block" data-i18n="angleIc">Fondo Cielo (IC)</span>
+                            <span id="ang-ic" class="text-sm font-semibold text-slate-300">-</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-800/50 border border-slate-700/50 p-4 rounded-2xl shadow-xl flex flex-col items-center">
+                        <h3 class="font-semibold text-slate-200 self-start mb-2">🔮 <span data-i18n="wheelTitle">Rueda Astrológica</span></h3>
+                        <div id="chart-wheel-container" class="w-full max-w-[500px] aspect-square flex items-center justify-center">
+                            <div class="text-slate-500 text-xs" data-i18n="wheelPlaceholder">Completa los datos y haz clic en "Calcular Carta Natal"</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-800/50 border border-slate-700/50 rounded-2xl overflow-hidden shadow-xl">
+                        <div class="px-6 py-4 border-b border-slate-700/50">
+                            <h3 class="font-semibold text-slate-200">🪐 <span data-i18n="planetsTitle">Posiciones Planetarias</span></h3>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm text-slate-300">
+                                <thead class="bg-slate-900/50 text-slate-400 uppercase text-[10px] tracking-wider">
+                                    <tr>
+                                        <th class="px-6 py-3" data-i18n="thPlanet">Planeta</th>
+                                        <th class="px-6 py-3" data-i18n="thSign">Signo</th>
+                                        <th class="px-6 py-3" data-i18n="thDegree">Grado</th>
+                                        <th class="px-6 py-3" data-i18n="thStatus">Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="planets-table-body" class="divide-y divide-slate-700/30">
+                                    <tr>
+                                        <td colspan="4" class="px-6 py-8 text-center text-slate-500" data-i18n="noDataLoaded">Sin datos cargados.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: SINASTRÍA DE PAREJA -->
+        <div id="tab-synastry" class="tab-content">
+            <div id="synastry-export-container" class="bg-slate-800/50 border border-slate-700/50 p-6 rounded-2xl shadow-xl space-y-6">
+                <h2 class="text-lg font-semibold text-slate-200 flex items-center gap-2">
+                    <span>💞</span> <span data-i18n="synastryMainTitle">Comparativa de Sinastría Avanzada</span>
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="synastry-forms-group">
+                    <!-- Persona A -->
+                    <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800 space-y-3">
+                        <h3 class="text-purple-400 font-bold text-sm" data-i18n="personA">Persona A</h3>
+                        <input type="text" id="syn-a-name" value="" data-i18n-placeholder="placeholderPersonA" placeholder="Nombre o Persona A" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-xs text-slate-200 focus:outline-none focus:border-purple-500">
+                        <div class="grid grid-cols-3 gap-2 text-xs">
+                            <input type="number" id="syn-a-year" value="" data-i18n-placeholder="placeholderYear" placeholder="Año" class="bg-slate-800 border border-slate-700 p-2 rounded focus:outline-none focus:border-purple-500">
+                            <input type="number" id="syn-a-month" value="" data-i18n-placeholder="placeholderMonth" placeholder="Mes" min="1" max="12" class="bg-slate-800 border border-slate-700 p-2 rounded focus:outline-none focus:border-purple-500">
+                            <input type="number" id="syn-a-day" value="" data-i18n-placeholder="placeholderDay" placeholder="Día" min="1" max="31" class="bg-slate-800 border border-slate-700 p-2 rounded focus:outline-none focus:border-purple-500">
+                        </div>
+                        <input type="time" id="syn-a-time" value="" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-xs focus:outline-none focus:border-purple-500">
+                    </div>
+
+                    <!-- Persona B -->
+                    <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800 space-y-3">
+                        <h3 class="text-pink-400 font-bold text-sm" data-i18n="personB">Persona B</h3>
+                        <input type="text" id="syn-b-name" value="" data-i18n-placeholder="placeholderPersonB" placeholder="Nombre o Persona B" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-xs text-slate-200 focus:outline-none focus:border-pink-500">
+                        <div class="grid grid-cols-3 gap-2 text-xs">
+                            <input type="number" id="syn-b-year" value="" data-i18n-placeholder="placeholderYear" placeholder="Año" class="bg-slate-800 border border-slate-700 p-2 rounded focus:outline-none focus:border-pink-500">
+                            <input type="number" id="syn-b-month" value="" data-i18n-placeholder="placeholderMonth" placeholder="Mes" min="1" max="12" class="bg-slate-800 border border-slate-700 p-2 rounded focus:outline-none focus:border-pink-500">
+                            <input type="number" id="syn-b-day" value="" data-i18n-placeholder="placeholderDay" placeholder="Día" min="1" max="31" class="bg-slate-800 border border-slate-700 p-2 rounded focus:outline-none focus:border-pink-500">
+                        </div>
+                        <input type="time" id="syn-b-time" value="" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-xs focus:outline-none focus:border-pink-500">
+                    </div>
+                </div>
+
+                <button onclick="handleCalculateSynastry()" id="btn-synastry-submit" class="w-full bg-pink-600 hover:bg-pink-500 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition duration-200" data-i18n="btnCalculateSynastry">
+                    Calcular Compatibilidad de Pareja
+                </button>
+
+                <div id="synastry-result" class="hidden bg-slate-900/80 p-6 rounded-xl border border-slate-800 space-y-6 mt-6"></div>
+
+                <div id="synastry-interpretation-card" class="hidden bg-slate-800/50 border border-slate-700/50 p-6 rounded-2xl shadow-xl space-y-4 mt-6">
+                    <h3 class="font-semibold text-slate-200 text-base flex items-center gap-2">
+                        <span>📖</span> <span data-i18n="synastryInterpTitle">Interpretación Profunda del Vínculo</span>
+                    </h3>
+                    <div id="synastry-interpretation-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                </div>
+
+                <div id="synastry-wheel-card" class="hidden bg-slate-800/50 border border-slate-700/50 p-6 rounded-2xl shadow-xl flex flex-col items-center mt-6">
+                    <h3 class="font-semibold text-slate-200 self-start mb-2">💞 <span data-i18n="synastryWheelTitle">Rueda de Sinastría (Doble Anillo)</span></h3>
+                    <div id="synastry-wheel-container" class="w-full max-w-[500px] aspect-square flex items-center justify-center"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: TRÁNSITOS ACTUALES -->
+        <div id="tab-transits" class="tab-content">
+            <div class="bg-slate-800/50 border border-slate-700/50 p-6 rounded-2xl shadow-xl space-y-6">
+                <div class="flex justify-between items-center flex-wrap gap-4">
+                    <div>
+                        <h2 class="text-lg font-semibold text-slate-200 flex items-center gap-2">
+                            <span>🌟</span> <span data-i18n="transitsMainTitle">Clima Astrológico y Tránsitos de Hoy</span>
+                        </h2>
+                        <p class="text-xs text-slate-400" data-i18n="transitsSubtitle">Analiza el movimiento del cielo actual y su impacto en tu carta natal.</p>
+                    </div>
+                    <button onclick="calculateTransits()" id="btn-transits" class="bg-purple-600 hover:bg-purple-500 text-white font-medium px-5 py-2.5 rounded-xl text-xs transition-colors shadow-lg shadow-purple-600/30" data-i18n="btnCalculateTransits">
+                        🔄 Calcular Tránsitos de Hoy
+                    </button>
+                </div>
+
+                <div id="transits-result" class="hidden space-y-6">
+                    <div class="bg-slate-900/80 p-5 rounded-xl border border-slate-800 flex justify-between items-center flex-wrap gap-3">
+                        <div>
+                            <span class="text-[10px] uppercase font-bold text-slate-400 block" data-i18n="transitDateLabel">Fecha del Clima Actual</span>
+                            <span id="transit-date-display" class="text-sm font-bold text-purple-300">--</span>
+                        </div>
+                        <div class="text-xs bg-purple-950/60 text-purple-300 border border-purple-800 px-3 py-1.5 rounded-lg" data-i18n="transitBadge">
+                            ✨ Ciclo Energético Activo
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-slate-900/60 p-5 rounded-xl border border-slate-800 space-y-3">
+                            <h3 class="font-bold text-slate-200 text-sm flex items-center gap-2">
+                                <span>🪐</span> <span data-i18n="transitPlanetsTitle">Planetas en Tránsito (Cielo de Hoy)</span>
+                            </h3>
+                            <div id="transit-planets-list" class="space-y-2 text-xs">
+                                <span class="text-slate-500" data-i18n="calculatingText">Calculando posiciones actuales...</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-900/60 p-5 rounded-xl border border-slate-800 space-y-3">
+                            <h3 class="font-bold text-slate-200 text-sm flex items-center gap-2">
+                                <span>⚡</span> <span data-i18n="transitEnergyTitle">Influencia Energética y Recomendaciones</span>
+                            </h3>
+                            <div id="transit-interpretations" class="space-y-3 text-xs text-slate-300">
+                                <p class="text-slate-500" data-i18n="transitInterpPlaceholder">Haz clic en calcular para ver cómo influyen los tránsitos de hoy en tus áreas de vida.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="transits-placeholder" class="text-center py-12 text-slate-500 text-xs" data-i18n="transitsPlaceholderMain">
+                    Haz clic en el botón superior para calcular el clima astrológico de hoy en base a tu carta guardada o predeterminada.
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: HISTORIAL GUARDADO -->
+        <div id="tab-history" class="tab-content">
+            <div class="bg-slate-800/50 border border-slate-700/50 p-6 rounded-2xl shadow-xl space-y-4">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-lg font-semibold text-slate-200" data-i18n="historyMainTitle">📁 Registros Astrológicos Guardados</h2>
+                    <button onclick="clearHistory()" class="text-xs bg-rose-950/60 hover:bg-rose-900 text-rose-300 border border-rose-800 px-3 py-1.5 rounded-lg transition-colors" data-i18n="btnClearHistory">
+                        🗑️ Borrar Historial
+                    </button>
+                </div>
+                <div id="history-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="text-slate-500 text-xs py-8 col-span-full text-center" data-i18n="noHistoryText">No hay cartas guardadas aún en el historial.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 5: RAW JSON -->
+        <div id="tab-raw" class="tab-content">
+            <div class="bg-slate-800/50 border border-slate-700/50 p-6 rounded-2xl shadow-xl">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-semibold text-slate-200" data-i18n="rawJsonTitle">JSON Devuelto por la API</h2>
+                    <button onclick="copyJson()" class="text-xs bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded text-slate-200 transition-colors" data-i18n="btnCopyJson">
+                        📋 Copiar JSON
+                    </button>
+                </div>
+                <pre id="json-output" class="bg-slate-950 p-4 rounded-xl font-mono text-xs text-green-400 overflow-x-auto border border-slate-800 max-h-[500px]">
+// Los datos JSON aparecerán aquí tras realizar el cálculo...
+                </pre>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        const API_URL = "http://192.168.0.133:8000";
+        let lastResponseData = null;
+        let lastSynastryData = null;
+        let lastTransitData = null;
+        let activeTabName = "chart";
+
+        let currentLat = 8.62;
+        let currentLon = -70.20;
+        let calculatedUtcHour = 0;
+
+        // Diccionario de Traducciones (i18n) - Español, Inglés, Italiano, Francés y Portugués
+        const translations = {
+            es: {
+                apiConnected: "API Conectada",
+                tabChart: "Carta Natal",
+                tabSynastry: "Sinastría de Pareja",
+                tabTransits: "Tránsitos Actuales",
+                tabHistory: "Historial Guardado",
+                tabRaw: "Respuesta JSON",
+                birthDataTitle: "Datos de Nacimiento",
+                labelName: "Nombre / Identificador",
+                placeholderName: "Nombre o Identificador",
+                labelDate: "Fecha (Año, Mes, Día)",
+                placeholderYear: "Año",
+                placeholderMonth: "Mes",
+                placeholderDay: "Día",
+                labelTime: "Hora Local (HH:MM)",
+                labelTimezone: "Zona Horaria (UTC)",
+                labelUtcCalculated: "Hora UTC Calculada:",
+                labelCity: "Ciudad / Lugar de Nacimiento",
+                placeholderCity: "Ej: Barinas, Venezuela",
+                labelLatitude: "Latitud:",
+                labelLongitude: "Longitud:",
+                btnCalculateChart: "Calcular Carta Natal",
+                angleAsc: "Ascendente (AC)",
+                angleMc: "Medio Cielo (MC)",
+                angleDc: "Descendente (DC)",
+                angleIc: "Fondo Cielo (IC)",
+                wheelTitle: "Rueda Astrológica",
+                wheelPlaceholder: 'Completa los datos y haz clic en "Calcular Carta Natal"',
+                planetsTitle: "Posiciones Planetarias",
+                thPlanet: "Planeta",
+                thSign: "Signo",
+                thDegree: "Grado",
+                thStatus: "Estado",
+                noDataLoaded: "Sin datos cargados.",
+                synastryMainTitle: "Comparativa de Sinastría Avanzada",
+                personA: "Persona A",
+                placeholderPersonA: "Nombre o Persona A",
+                personB: "Persona B",
+                placeholderPersonB: "Nombre o Persona B",
+                btnCalculateSynastry: "Calcular Compatibilidad de Pareja",
+                synastryInterpTitle: "Interpretación Profunda del Vínculo",
+                synastryWheelTitle: "Rueda de Sinastría (Doble Anillo)",
+                transitsMainTitle: "Clima Astrológico y Tránsitos de Hoy",
+                transitsSubtitle: "Analiza el movimiento del cielo actual y su impacto en tu carta natal.",
+                btnCalculateTransits: "🔄 Calcular Tránsitos de Hoy",
+                transitDateLabel: "Fecha del Clima Actual",
+                transitBadge: "✨ Ciclo Energético Activo",
+                transitPlanetsTitle: "Planetas en Tránsito (Cielo de Hoy)",
+                calculatingText: "Calculando posiciones actuales...",
+                transitEnergyTitle: "Influencia Energética y Recomendaciones",
+                transitInterpPlaceholder: "Haz clic en calcular para ver cómo influyen los tránsitos de hoy en tus áreas de vida.",
+                transitsPlaceholderMain: "Haz clic en el botón superior para calcular el clima astrológico de hoy en base a tu carta guardada o predeterminada.",
+                historyMainTitle: "📁 Registros Astrológicos Guardados",
+                btnClearHistory: "🗑️ Borrar Historial",
+                noHistoryText: "No hay cartas guardadas aún en el historial.",
+                rawJsonTitle: "JSON Devuelto por la API",
+                btnCopyJson: "📋 Copiar JSON",
+                btnLoadData: "🔄 Cargar Datos"
+            },
+            en: {
+                apiConnected: "API Connected",
+                tabChart: "Natal Chart",
+                tabSynastry: "Couples Synastry",
+                tabTransits: "Current Transits",
+                tabHistory: "Saved History",
+                tabRaw: "JSON Response",
+                birthDataTitle: "Birth Data",
+                labelName: "Name / Identifier",
+                placeholderName: "Name or Identifier",
+                labelDate: "Date (Year, Month, Day)",
+                placeholderYear: "Year",
+                placeholderMonth: "Month",
+                placeholderDay: "Day",
+                labelTime: "Local Time (HH:MM)",
+                labelTimezone: "Time Zone (UTC)",
+                labelUtcCalculated: "Calculated UTC Time:",
+                labelCity: "City / Birth Place",
+                placeholderCity: "Ex: New York, USA",
+                labelLatitude: "Latitude:",
+                labelLongitude: "Longitude:",
+                btnCalculateChart: "Calculate Natal Chart",
+                angleAsc: "Ascendant (AC)",
+                angleMc: "Midheaven (MC)",
+                angleDc: "Descendant (DC)",
+                angleIc: "Imum Coeli (IC)",
+                wheelTitle: "Astrological Wheel",
+                wheelPlaceholder: 'Complete the data and click "Calculate Natal Chart"',
+                planetsTitle: "Planetary Positions",
+                thPlanet: "Planet",
+                thSign: "Sign",
+                thDegree: "Degree",
+                thStatus: "Status",
+                noDataLoaded: "No data loaded.",
+                synastryMainTitle: "Advanced Synastry Comparison",
+                personA: "Person A",
+                placeholderPersonA: "Name or Person A",
+                personB: "Person B",
+                placeholderPersonB: "Name or Person B",
+                btnCalculateSynastry: "Calculate Couple Compatibility",
+                synastryInterpTitle: "Deep Bond Interpretation",
+                synastryWheelTitle: "Synastry Wheel (Double Ring)",
+                transitsMainTitle: "Astrological Climate & Today's Transits",
+                transitsSubtitle: "Analyze current sky movements and their impact on your natal chart.",
+                btnCalculateTransits: "🔄 Calculate Today's Transits",
+                transitDateLabel: "Current Climate Date",
+                transitBadge: "✨ Active Energy Cycle",
+                transitPlanetsTitle: "Transit Planets (Today's Sky)",
+                calculatingText: "Calculating current positions...",
+                transitEnergyTitle: "Energy Influence & Recommendations",
+                transitInterpPlaceholder: "Click calculate to see how today's transits influence your life areas.",
+                transitsPlaceholderMain: "Click the button above to calculate today's astrological climate based on your saved chart.",
+                historyMainTitle: "📁 Saved Astrological Records",
+                btnClearHistory: "🗑️ Clear History",
+                noHistoryText: "No charts saved in history yet.",
+                rawJsonTitle: "JSON Returned by API",
+                btnCopyJson: "📋 Copy JSON",
+                btnLoadData: "🔄 Load Data"
+            },
+            it: {
+                apiConnected: "API Connessa",
+                tabChart: "Carta Natale",
+                tabSynastry: "Sinastria di Coppia",
+                tabTransits: "Transiti Attuali",
+                tabHistory: "Cronologia Salvata",
+                tabRaw: "Risposta JSON",
+                birthDataTitle: "Dati di Nascita",
+                labelName: "Nome / Identificatore",
+                placeholderName: "Nome o Identificatore",
+                labelDate: "Data (Anno, Mese, Giorno)",
+                placeholderYear: "Anno",
+                placeholderMonth: "Mese",
+                placeholderDay: "Giorno",
+                labelTime: "Ora Locale (HH:MM)",
+                labelTimezone: "Fuso Orario (UTC)",
+                labelUtcCalculated: "Ora UTC Calcolata:",
+                labelCity: "Città / Luogo di Nascita",
+                placeholderCity: "Es: Roma, Italia",
+                labelLatitude: "Latitudine:",
+                labelLongitude: "Longitudine:",
+                btnCalculateChart: "Calcola Carta Natale",
+                angleAsc: "Ascendente (AC)",
+                angleMc: "Medio Cielo (MC)",
+                angleDc: "Discendente (DC)",
+                angleIc: "Fondo Cielo (IC)",
+                wheelTitle: "Ruota Astrologica",
+                wheelPlaceholder: 'Completa i dati e clicca su "Calcola Carta Natale"',
+                planetsTitle: "Posizioni Planetarie",
+                thPlanet: "Pianeta",
+                thSign: "Segno",
+                thDegree: "Grado",
+                thStatus: "Stato",
+                noDataLoaded: "Nessun dato caricato.",
+                synastryMainTitle: "Sinastria Avanzata",
+                personA: "Persona A",
+                placeholderPersonA: "Nome o Persona A",
+                personB: "Persona B",
+                placeholderPersonB: "Nome o Persona B",
+                btnCalculateSynastry: "Calcola Compatibilità di Coppia",
+                synastryInterpTitle: "Interpretazione Profonda del Legame",
+                synastryWheelTitle: "Ruota di Sinastria (Doppio Anello)",
+                transitsMainTitle: "Clima Astrologico e Transiti di Oggi",
+                transitsSubtitle: "Analizza il movimento del cielo attuale e il suo impatto sul tuo tema natale.",
+                btnCalculateTransits: "🔄 Calcola i Transiti di Oggi",
+                transitDateLabel: "Data del Clima Attuale",
+                transitBadge: "✨ Ciclo Energetico Attivo",
+                transitPlanetsTitle: "Pianeti in Transito (Cielo di Oggi)",
+                calculatingText: "Calcolo delle posizioni attuali...",
+                transitEnergyTitle: "Influenza Energetica e Raccomandazioni",
+                transitInterpPlaceholder: "Clicca su calcola per vedere come i transiti di oggi influenzano le tue aree di vita.",
+                transitsPlaceholderMain: "Clicca sul pulsante sopra per calcolare il clima astrologico di oggi basato sul tuo tema salvato.",
+                historyMainTitle: "📁 Registri Astrologici Salvati",
+                btnClearHistory: "🗑️ Cancella Cronologia",
+                noHistoryText: "Nessun tema salvato nella cronologia.",
+                rawJsonTitle: "JSON Restituito dall'API",
+                btnCopyJson: "📋 Copia JSON",
+                btnLoadData: "🔄 Carica Dati"
+            },
+            fr: {
+                apiConnected: "API Connectée",
+                tabChart: "Thème Natal",
+                tabSynastry: "Synastrie de Couple",
+                tabTransits: "Transits Actuels",
+                tabHistory: "Historique Sauvegardé",
+                tabRaw: "Réponse JSON",
+                birthDataTitle: "Données de Naissance",
+                labelName: "Nom / Identifiant",
+                placeholderName: "Nom ou Identifiant",
+                labelDate: "Date (Année, Mois, Jour)",
+                placeholderYear: "Année",
+                placeholderMonth: "Mois",
+                placeholderDay: "Jour",
+                labelTime: "Heure Locale (HH:MM)",
+                labelTimezone: "Fuseau Horaire (UTC)",
+                labelUtcCalculated: "Heure UTC Calculée :",
+                labelCity: "Ville / Lieu de Naissance",
+                placeholderCity: "Ex: Paris, France",
+                labelLatitude: "Latitude :",
+                labelLongitude: "Longitude :",
+                btnCalculateChart: "Calculer le Thème Natal",
+                angleAsc: "Ascendant (AC)",
+                angleMc: "Milieu du Ciel (MC)",
+                angleDc: "Descendant (DC)",
+                angleIc: "Fond du Ciel (IC)",
+                wheelTitle: "Roue Astrologique",
+                wheelPlaceholder: 'Remplissez les données et cliquez sur "Calculer le Thème Natal"',
+                planetsTitle: "Positions Planétaires",
+                thPlanet: "Planète",
+                thSign: "Signe",
+                thDegree: "Degré",
+                thStatus: "Statut",
+                noDataLoaded: "Aucune donnée chargée.",
+                synastryMainTitle: "Comparaison de Synastrie Avancée",
+                personA: "Personne A",
+                placeholderPersonA: "Nom ou Personne A",
+                personB: "Personne B",
+                placeholderPersonB: "Nom ou Personne B",
+                btnCalculateSynastry: "Calculer la Compatibilité de Couple",
+                synastryInterpTitle: "Interprétation Profonde du Lien",
+                synastryWheelTitle: "Roue de Synastrie (Double Anneau)",
+                transitsMainTitle: "Climat Astrologique et Transits du Jour",
+                transitsSubtitle: "Analysez le mouvement du ciel actuel et son impact sur votre thème natal.",
+                btnCalculateTransits: "🔄 Calculer les Transits du Jour",
+                transitDateLabel: "Date du Climat Actuel",
+                transitBadge: "✨ Cycle Énergétique Actif",
+                transitPlanetsTitle: "Planètes en Transit (Ciel du Jour)",
+                calculatingText: "Calcul des positions actuelles...",
+                transitEnergyTitle: "Influence Énergétique et Recommandations",
+                transitInterpPlaceholder: "Cliquez sur calculer pour voir comment les transits d'aujourd'hui influencent vos domaines de vie.",
+                transitsPlaceholderMain: "Cliquez sur le bouton ci-dessus pour calculer le climat astrologique du jour en fonction de votre thème sauvegardé.",
+                historyMainTitle: "📁 Registres Astrologiques Sauvegardés",
+                btnClearHistory: "🗑️ Effacer l'Historique",
+                noHistoryText: "Aucun thème enregistré dans l'historique pour le moment.",
+                rawJsonTitle: "JSON Renvoyé par l'API",
+                btnCopyJson: "📋 Copier le JSON",
+                btnLoadData: "🔄 Charger les Données"
+            },
+            pt: {
+                apiConnected: "API Conectada",
+                tabChart: "Mapa Natal",
+                tabSynastry: "Sinastria de Casal",
+                tabTransits: "Trânsitos Atuais",
+                tabHistory: "Histórico Salvo",
+                tabRaw: "Resposta JSON",
+                birthDataTitle: "Dados de Nascimento",
+                labelName: "Nome / Identificador",
+                placeholderName: "Nome ou Identificador",
+                labelDate: "Data (Ano, Mês, Dia)",
+                placeholderYear: "Ano",
+                placeholderMonth: "Mês",
+                placeholderDay: "Dia",
+                labelTime: "Hora Local (HH:MM)",
+                labelTimezone: "Fuso Horário (UTC)",
+                labelUtcCalculated: "Hora UTC Calculada:",
+                labelCity: "Cidade / Local de Nascimento",
+                placeholderCity: "Ex: São Paulo, Brasil",
+                labelLatitude: "Latitude:",
+                labelLongitude: "Longitude:",
+                btnCalculateChart: "Calcular Mapa Natal",
+                angleAsc: "Ascendente (AC)",
+                angleMc: "Meio do Céu (MC)",
+                angleDc: "Descendente (DC)",
+                angleIc: "Fundo do Céu (IC)",
+                wheelTitle: "Roda Astrológica",
+                wheelPlaceholder: 'Preencha os dados e clique em "Calcular Mapa Natal"',
+                planetsTitle: "Posições Planetárias",
+                thPlanet: "Planeta",
+                thSign: "Signo",
+                thDegree: "Grau",
+                thStatus: "Status",
+                noDataLoaded: "Nenhum dado carregado.",
+                synastryMainTitle: "Comparação de Sinastria Avançada",
+                personA: "Pessoa A",
+                placeholderPersonA: "Nome ou Pessoa A",
+                personB: "Pessoa B",
+                placeholderPersonB: "Nome ou Pessoa B",
+                btnCalculateSynastry: "Calcular Compatibilidade do Casal",
+                synastryInterpTitle: "Interpretação Profunda do Vínculo",
+                synastryWheelTitle: "Roda de Sinastria (Anel Duplo)",
+                transitsMainTitle: "Clima Astrológico e Tránsitos de Hoje",
+                transitsSubtitle: "Analise o movimento do céu atual e o seu impacto no seu mapa natal.",
+                btnCalculateTransits: "🔄 Calcular Tránsitos de Hoje",
+                transitDateLabel: "Data do Clima Atual",
+                transitBadge: "✨ Ciclo Energético Ativo",
+                transitPlanetsTitle: "Planetas em Trânsito (Céu de Hoje)",
+                calculatingText: "Calculando posições atuais...",
+                transitEnergyTitle: "Influência Energética e Recomendações",
+                transitInterpPlaceholder: "Clique em calcular para ver como os tránsitos de hoje influencian as suas áreas de vida.",
+                transitsPlaceholderMain: "Clique no botão acima para calcular o clima astrológico de hoje com base no seu mapa salvo.",
+                historyMainTitle: "📁 Registros Astrológicos Salvos",
+                btnClearHistory: "🗑️ Limpar Histórico",
+                noHistoryText: "Nenhum mapa salvo no histórico ainda.",
+                rawJsonTitle: "JSON Retornado pela API",
+                btnCopyJson: "📋 Copiar JSON",
+                btnLoadData: "🔄 Carregar Dados"
+            }
+        };
+
+        function changeLanguage(lang) {
+            const t = translations[lang] || translations['es'];
+            
+            // Actualizar elementos con atributo data-i18n
+            document.querySelectorAll("[data-i18n]").forEach(el => {
+                const key = el.getAttribute("data-i18n");
+                if (t[key]) {
+                    el.textContent = t[key];
+                }
+            });
+
+            // Actualizar placeholders con atributo data-i18n-placeholder
+            document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+                const key = el.getAttribute("data-i18n-placeholder");
+                if (t[key]) {
+                    el.placeholder = t[key];
+                }
+            });
+        }
+
+        const HOUSE_MEANINGS = {
+            1: "Aparición personal y presencia", 2: "Recursos y valores", 3: "Comunicación y mentalidad",
+            4: "Hogar y raíces profundas", 5: "Romance, creatividad y gozo", 6: "Rutina y bienestar",
+            7: "Compromiso y relaciones directas", 8: "Intimidad y transformación", 9: "Expansión e ideales",
+            10: "Metas e impacto público", 11: "Proyectos y amistades", 12: "Mundo espiritual e inconsciente"
+        };
+
+        function checkApiStatus() {
+            const badge = document.getElementById('status-badge');
+            if (badge) {
+                badge.className = "flex items-center space-x-2 text-xs px-3 py-1 rounded-full bg-emerald-950/50 text-emerald-400 border border-emerald-800";
+                const currentLang = document.getElementById('langSwitch').value;
+                let apiText = "API Conectada";
+                if (currentLang === 'en') apiText = "API Connected";
+                else if (currentLang === 'it') apiText = "API Connessa";
+                else if (currentLang === 'fr') apiText = "API Connectée";
+                else if (currentLang === 'pt') apiText = "API Conectada";
+                badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span><span>${apiText}</span>`;
+            }
+        }
+
+        checkApiStatus();
+
+        function switchTab(tab) {
+            activeTabName = tab;
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.getElementById(`tab-${tab}`).classList.add('active');
+
+            const btns = ['chart', 'synastry', 'transits', 'history', 'raw'];
+            btns.forEach(b => {
+                const btn = document.getElementById(`tab-btn-${b}`);
+                if (btn) btn.className = (b === tab) 
+                    ? "px-5 py-3 font-medium text-sm border-b-2 border-purple-500 text-purple-400 transition-all whitespace-nowrap" 
+                    : "px-5 py-3 font-medium text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-all whitespace-nowrap";
+            });
+
+            const actionBtns = document.getElementById('action-buttons');
+            if ((tab === 'chart' && lastResponseData) || (tab === 'synastry' && lastSynastryData) || (tab === 'transits' && lastTransitData)) {
+                actionBtns.classList.remove('hidden');
+            } else {
+                actionBtns.classList.add('hidden');
+            }
+
+            if (tab === 'history') renderHistoryUI();
+        }
+
+        function updateUtcCalculation() {
+            const timeVal = document.getElementById('time-local').value;
+            const offsetVal = parseFloat(document.getElementById('utc-offset').value);
+
+            if (!timeVal) return;
+
+            const [hours, minutes] = timeVal.split(':').map(Number);
+            const localDecimal = hours + (minutes / 60);
+
+            let utcDecimal = localDecimal - offsetVal;
+            if (utcDecimal < 0) utcDecimal += 24;
+            if (utcDecimal >= 24) utcDecimal -= 24;
+
+            calculatedUtcHour = utcDecimal;
+
+            const utcHH = Math.floor(utcDecimal);
+            const utcMM = Math.round((utcDecimal - utcHH) * 60);
+            const formattedTime = `${String(utcHH).padStart(2, '0')}:${String(utcMM).padStart(2, '0')}`;
+
+            document.getElementById('utc-calculated-display').textContent = `${utcDecimal.toFixed(2)} hrs (${formattedTime} UTC)`;
+        }
+
+        async function searchLocation() {
+            const query = document.getElementById('city-search').value.trim();
+            const resultsDiv = document.getElementById('city-results');
+
+            if (!query) return;
+
+            resultsDiv.innerHTML = '<div class="p-2 text-slate-400">Buscando...</div>';
+            resultsDiv.classList.remove('hidden');
+
+            try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`);
+                const data = await res.json();
+
+                resultsDiv.innerHTML = '';
+                if (data.length === 0) {
+                    resultsDiv.innerHTML = '<div class="p-2 text-slate-400">No se encontraron lugares.</div>';
+                    return;
+                }
+
+                data.forEach(item => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = "w-full text-left p-2 hover:bg-purple-900/50 text-slate-200 transition-colors border-b border-slate-800 last:border-0";
+                    btn.textContent = item.display_name;
+                    btn.onclick = () => {
+                        currentLat = parseFloat(item.lat);
+                        currentLon = parseFloat(item.lon);
+                        document.getElementById('lat-val').textContent = currentLat.toFixed(4);
+                        document.getElementById('lon-val').textContent = currentLon.toFixed(4);
+                        document.getElementById('city-search').value = item.display_name.split(',')[0];
+                        resultsDiv.classList.add('hidden');
+                    };
+                    resultsDiv.appendChild(btn);
+                });
+            } catch (e) {
+                resultsDiv.innerHTML = '<div class="p-2 text-red-400">Error al buscar ubicación.</div>';
+            }
+        }
+
+        async function handleCalculate(event) {
+            event.preventDefault();
+            updateUtcCalculation();
+
+            const name = document.getElementById('person-name').value || "Mi Carta";
+            const payload = {
+                year: parseInt(document.getElementById('year').value),
+                month: parseInt(document.getElementById('month').value),
+                day: parseInt(document.getElementById('day').value),
+                hour: calculatedUtcHour,
+                lat: currentLat,
+                lon: currentLon
+            };
+
+            const btnSubmit = document.getElementById('btn-submit');
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = `<span>Calculando...</span>`;
+
+            try {
+                const response = await fetch(`${API_URL}/chart`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error("Error en la respuesta de la API");
+
+                const data = await response.json();
+                lastResponseData = data;
+                renderResults(data);
+                drawAstrologicalWheel(data);
+                saveToLocalStorage(name, payload, data);
+                document.getElementById('action-buttons').classList.remove('hidden');
+            } catch (error) {
+                alert("Error de conexión con la API.");
+            } finally {
+                btnSubmit.disabled = false;
+                const currentLang = document.getElementById('langSwitch').value;
+                let btnText = "Calcular Carta Natal";
+                if (currentLang === 'en') btnText = "Calculate Natal Chart";
+                else if (currentLang === 'it') btnText = "Calcola Carta Natale";
+                else if (currentLang === 'fr') btnText = "Calculer le Thème Natal";
+                else if (currentLang === 'pt') btnText = "Calcular Mapa Natal";
+                btnSubmit.innerHTML = `<span>${btnText}</span>`;
+            }
+        }
+
+        async function calculateTransits() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = today.getMonth() + 1;
+            const day = today.getDate();
+
+            const payload = {
+                year: year,
+                month: month,
+                day: day,
+                hour: 12.0,
+                lat: currentLat,
+                lon: currentLon
+            };
+
+            const btn = document.getElementById('btn-transits');
+            btn.disabled = true;
+            btn.textContent = "Calculando tránsitos...";
+
+            try {
+                const res = await fetch(`${API_URL}/chart`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!res.ok) throw new Error("Error al calcular tránsitos");
+
+                const transitData = await res.json();
+                lastTransitData = { date: today.toLocaleDateString(), data: transitData };
+
+                document.getElementById('transit-date-display').textContent = `${today.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} (12:00 UTC)`;
+                
+                const planetsList = document.getElementById('transit-planets-list');
+                planetsList.innerHTML = '';
+                transitData.planets.forEach(p => {
+                    const div = document.createElement('div');
+                    div.className = "flex justify-between items-center bg-slate-950 p-2.5 rounded border border-slate-800";
+                    div.innerHTML = `
+                        <span class="font-medium text-slate-200 flex items-center gap-1.5"><span>${getPlanetIcon(p.name)}</span> ${p.name}</span>
+                        <span class="text-purple-300 font-mono">${p.sign} ${p.sign_deg.toFixed(1)}° ${p.is_retrograde ? '(Rx)' : ''}</span>
+                    `;
+                    planetsList.appendChild(div);
+                });
+
+                const interpretationsDiv = document.getElementById('transit-interpretations');
+                const sunTransit = transitData.planets.find(p => p.name === 'Sun');
+                const moonTransit = transitData.planets.find(p => p.name === 'Moon');
+                const venusTransit = transitData.planets.find(p => p.name === 'Venus');
+
+                interpretationsDiv.innerHTML = `
+                    <div class="bg-slate-950 p-3 rounded border border-slate-800 space-y-1">
+                        <span class="font-bold text-purple-300">☀️ Sol Actual en ${sunTransit ? sunTransit.sign : ''}:</span>
+                        <p class="text-slate-300">Ilumina los temas relacionados con la identidad, vitalidad y enfoque general de la temporada actual.</p>
+                    </div>
+                    <div class="bg-slate-950 p-3 rounded border border-slate-800 space-y-1">
+                        <span class="font-bold text-pink-300">🌙 Luna de Hoy en ${moonTransit ? moonTransit.sign : ''}:</span>
+                        <p class="text-slate-300">Modula el clima emocional colectivo e intuitivo de la jornada, marcando el pulso anímico del día.</p>
+                    </div>
+                    <div class="bg-slate-950 p-3 rounded border border-slate-800 space-y-1">
+                        <span class="font-bold text-rose-300">♀️ Venus Actual en ${venusTransit ? venusTransit.sign : ''}:</span>
+                        <p class="text-slate-300">Favorece las interacciones sociales, la valoración personal y el disfrute en las relaciones afectivas.</p>
+                    </div>
+                `;
+
+                document.getElementById('transits-placeholder').classList.add('hidden');
+                document.getElementById('transits-result').classList.remove('hidden');
+                document.getElementById('action-buttons').classList.remove('hidden');
+            } catch (e) {
+                console.error(e);
+                alert("No se pudieron calcular los tránsitos.");
+            } finally {
+                btn.disabled = false;
+                const currentLang = document.getElementById('langSwitch').value;
+                let btnText = "🔄 Calcular Tránsitos de Hoy";
+                if (currentLang === 'en') btnText = "🔄 Calculate Today's Transits";
+                else if (currentLang === 'it') btnText = "🔄 Calcola i Transiti di Oggi";
+                else if (currentLang === 'fr') btnText = "🔄 Calculer les Transits du Jour";
+                else if (currentLang === 'pt') btnText = "🔄 Calcular Tránsitos de Hoje";
+                btn.textContent = btnText;
+            }
+        }
+
+        function parseTimeToDecimal(timeStr) {
+            if (!timeStr) return 12.0;
+            const [h, m] = timeStr.split(':').map(Number);
+            return h + (m / 60);
+        }
+
+        async function handleCalculateSynastry() {
+            const nameA = document.getElementById('syn-a-name').value || "Persona A";
+            const nameB = document.getElementById('syn-b-name').value || "Persona B";
+
+            const payloadA = {
+                year: parseInt(document.getElementById('syn-a-year').value),
+                month: parseInt(document.getElementById('syn-a-month').value),
+                day: parseInt(document.getElementById('syn-a-day').value),
+                hour: parseTimeToDecimal(document.getElementById('syn-a-time').value),
+                lat: currentLat, lon: currentLon
+            };
+
+            const payloadB = {
+                year: parseInt(document.getElementById('syn-b-year').value),
+                month: parseInt(document.getElementById('syn-b-month').value),
+                day: parseInt(document.getElementById('syn-b-day').value),
+                hour: parseTimeToDecimal(document.getElementById('syn-b-time').value),
+                lat: currentLat, lon: currentLon
+            };
+
+            const btnSyn = document.getElementById('btn-synastry-submit');
+            btnSyn.disabled = true;
+            btnSyn.textContent = "Calculando...";
+
+            try {
+                const res = await fetch(`${API_URL}/synastry`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ person_a: payloadA, person_b: payloadB })
+                });
+
+                if (!res.ok) throw new Error("Error en la respuesta de la API de sinastría");
+
+                const synData = await res.json();
+                lastSynastryData = { nameA, nameB, data: synData };
+
+                const sunA = synData.chart_a.planets.find(p => p.name === 'Sun');
+                const sunB = synData.chart_b.planets.find(p => p.name === 'Sun');
+                const venusA = synData.chart_a.planets.find(p => p.name === 'Venus');
+                const venusB = synData.chart_b.planets.find(p => p.name === 'Venus');
+                const moonA = synData.chart_a.planets.find(p => p.name === 'Moon');
+                const moonB = synData.chart_b.planets.find(p => p.name === 'Moon');
+
+                let score = 50;
+                if (synData.cross_aspects && synData.cross_aspects.length > 0) {
+                    synData.cross_aspects.forEach(asp => {
+                        if (asp.aspect === 'Conjunction' || asp.aspect === 'Trine' || asp.aspect === 'Sextile') {
+                            score += 4;
+                        } else if (asp.aspect === 'Square' || asp.aspect === 'Opposition') {
+                            score -= 3;
+                        }
+                    });
+                }
+                
+                const fireSigns = ['Aries', 'Leo', 'Sagittarius'];
+                const earthSigns = ['Taurus', 'Virgo', 'Capricorn'];
+                const airSigns = ['Gemini', 'Libra', 'Aquarius'];
+                const waterSigns = ['Cancer', 'Scorpio', 'Pisces'];
+
+                function getElement(sign) {
+                    if (fireSigns.includes(sign)) return 'Fuego';
+                    if (earthSigns.includes(sign)) return 'Tierra';
+                    if (airSigns.includes(sign)) return 'Aire';
+                    if (waterSigns.includes(sign)) return 'Agua';
+                    return '';
+                }
+
+                if (sunA && sunB) {
+                    const elA = getElement(sunA.sign);
+                    const elB = getElement(sunB.sign);
+                    if (elA === elB) score += 10;
+                    else if ((elA === 'Fuego' && elB === 'Aire') || (elA === 'Aire' && elB === 'Fuego') ||
+                             (elA === 'Tierra' && elB === 'Agua') || (elA === 'Agua' && elB === 'Tierra')) {
+                        score += 8;
+                    }
+                }
+
+                score = Math.min(Math.max(score, 35), 96);
+
+                const venusB_in_A = synData.overlays_b_in_a ? synData.overlays_b_in_a.find(o => o.planet === 'Venus') : null;
+                const marsB_in_A = synData.overlays_b_in_a ? synData.overlays_b_in_a.find(o => o.planet === 'Mars') : null;
+
+                const container = document.getElementById('synastry-result');
+                container.classList.remove('hidden');
+                container.innerHTML = `
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3 flex-wrap gap-2">
+                        <h4 class="font-bold text-pink-400 text-lg">Resultado de Sinastría: ${nameA} & ${nameB}</h4>
+                        <span class="text-xs bg-pink-950/80 text-pink-300 border border-pink-800 px-3 py-1 rounded-full font-mono font-bold">✨ ${score}% Compatibilidad Astrológica</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-slate-300">
+                        <div class="bg-slate-950 p-3.5 rounded-lg border border-slate-800 space-y-1">
+                            <span class="text-purple-400 font-bold block mb-1">👤 ${nameA}:</span>
+                            <p>☀️ Sol en ${sunA ? sunA.sign : '-'} (${sunA ? sunA.sign_deg.toFixed(2) : 0}°)</p>
+                            ${moonA ? `<p>🌙 Luna en ${moonA.sign}</p>` : ''}
+                            ${venusA ? `<p>♀️ Venus en ${venusA.sign}</p>` : ''}
+                        </div>
+                        <div class="bg-slate-950 p-3.5 rounded-lg border border-slate-800 space-y-1">
+                            <span class="text-pink-400 font-bold block mb-1">👤 ${nameB}:</span>
+                            <p>☀️ Sol en ${sunB ? sunB.sign : '-'} (${sunB ? sunB.sign_deg.toFixed(2) : 0}°)</p>
+                            ${moonB ? `<p>🌙 Luna en ${moonB.sign}</p>` : ''}
+                            ${venusB ? `<p>♀️ Venus en ${venusB.sign}</p>` : ''}
+                        </div>
+                    </div>
+                `;
+
+                const interpCard = document.getElementById('synastry-interpretation-card');
+                const interpGrid = document.getElementById('synastry-interpretation-grid');
+                interpGrid.innerHTML = '';
+
+                let interpHtml = `
+                    <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800 space-y-2 text-xs">
+                        <h5 class="font-bold text-purple-300">💡 Sintonía Esencial de Soles</h5>
+                        <p class="text-slate-300">La conexión entre ${nameA} (${sunA ? sunA.sign : ''}) y ${nameB} (${sunB ? sunB.sign : ''}) define el propósito vital compartido y la forma en que se admiran mutuamente en el día a día.</p>
+                    </div>
+                `;
+
+                if (venusB_in_A) {
+                    interpHtml += `
+                        <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800 space-y-2 text-xs">
+                            <h5 class="font-bold text-pink-300">♀️ Venus de ${nameB} en Casa ${venusB_in_A.house_in_a} de ${nameA}</h5>
+                            <p class="text-slate-300">Activa directamente el área de <strong class="text-slate-200">${HOUSE_MEANINGS[venusB_in_A.house_in_a] || 'Vínculos'}</strong>, generando un fuerte magnetismo, afecto y deseo de compartir momentos placenteros.</p>
+                        </div>
+                    `;
+                }
+
+                if (marsB_in_A) {
+                    interpHtml += `
+                        <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800 space-y-2 text-xs">
+                            <h5 class="font-bold text-rose-300">♂️ Marte de ${nameB} en Casa ${marsB_in_A.house_in_a} de ${nameA}</h5>
+                            <p class="text-slate-300">Aporta una chispa de alta energía, dinamismo y pasión impulsiva en los asuntos de la casa ${marsB_in_A.house_in_a}, estimulando la acción conjunta.</p>
+                        </div>
+                    `;
+                }
+
+                interpGrid.innerHTML = interpHtml;
+                interpCard.classList.remove('hidden');
+
+                drawSynastryWheel(synData);
+                document.getElementById('action-buttons').classList.remove('hidden');
+            } catch (error) {
+                console.error(error);
+                alert("Error al calcular la sinastría con la API.");
+            } finally {
+                btnSyn.disabled = false;
+                const currentLang = document.getElementById('langSwitch').value;
+                let btnText = "Calcular Compatibilidad de Pareja";
+                if (currentLang === 'en') btnText = "Calculate Couple Compatibility";
+                else if (currentLang === 'it') btnText = "Calcola Compatibilità di Coppia";
+                else if (currentLang === 'fr') btnText = "Calculer la Compatibilité de Couple";
+                else if (currentLang === 'pt') btnText = "Calcular Compatibilidade do Casal";
+                btnSyn.textContent = btnText;
+            }
+        }
+
+        function drawSynastryWheel(synData) {
+            const container = document.getElementById('synastry-wheel-container');
+            if (!container) return;
+            const chartA = synData.chart_a;
+            const chartB = synData.chart_b;
+            const ascDeg = chartA.angles && chartA.angles.Ascendant ? chartA.angles.Ascendant.abs_deg : 0;
+            
+            const size = 460;
+            const center = size / 2;
+            const radius = 205;
+            const midRadius = 155;
+            const innerRadius = 105;
+
+            const zodiacSymbols = ["♈", "♉", "♊", "♋", "♌", "♍", "♎", "♏", "♐", "♑", "♒", "♓"];
+            const elementColors = ["#ef4444", "#10b981", "#3b82f6", "#f59e0b"];
+
+            let svg = `<svg viewBox="0 0 ${size} ${size}" class="w-full h-full">`;
+            
+            svg += `<circle cx="${center}" cy="${center}" r="${radius}" fill="none" stroke="#475569" stroke-width="2"/>`;
+            svg += `<circle cx="${center}" cy="${center}" r="${midRadius}" fill="none" stroke="#334155" stroke-width="1.5"/>`;
+            svg += `<circle cx="${center}" cy="${center}" r="${innerRadius}" fill="#0f172a" stroke="#334155" stroke-width="2"/>`;
+
+            function getCoords(deg, r) {
+                const rad = (180 - (deg - ascDeg)) * (Math.PI / 180);
+                return { x: center + r * Math.cos(rad), y: center - r * Math.sin(rad) };
+            }
+
+            for (let i = 0; i < 12; i++) {
+                const startDeg = i * 30;
+                const p1 = getCoords(startDeg, radius);
+                const p2 = getCoords(startDeg, midRadius);
+                svg += `<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="#334155" stroke-width="1.5"/>`;
+
+                const midCoords = getCoords(startDeg + 15, (radius + midRadius) / 2);
+                svg += `<text x="${midCoords.x}" y="${midCoords.y}" fill="${elementColors[i % 4]}" font-size="14" font-weight="bold" text-anchor="middle" dominant-baseline="central">${zodiacSymbols[i]}</text>`;
+            }
+
+            if (chartA.houses) {
+                chartA.houses.forEach(h => {
+                    const p1 = getCoords(h.abs_deg, midRadius);
+                    const p2 = getCoords(h.abs_deg, innerRadius);
+                    svg += `<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="#94a3b8" stroke-dasharray="2,2" stroke-width="1"/>`;
+                });
+            }
+
+            if (chartA.planets) {
+                chartA.planets.forEach(p => {
+                    const pt = getCoords(p.abs_deg, innerRadius + 25);
+                    svg += `<circle cx="${pt.x}" cy="${pt.y}" r="9" fill="#1e293b" stroke="#a855f7" stroke-width="1"/>`;
+                    svg += `<text x="${pt.x}" y="${pt.y}" fill="#c084fc" font-size="10" text-anchor="middle" dominant-baseline="central">${getPlanetIcon(p.name)}</text>`;
+                });
+            }
+
+            if (chartB.planets) {
+                chartB.planets.forEach(p => {
+                    const pt = getCoords(p.abs_deg, midRadius + 25);
+                    svg += `<circle cx="${pt.x}" cy="${pt.y}" r="9" fill="#1e293b" stroke="#ec4899" stroke-width="1"/>`;
+                    svg += `<text x="${pt.x}" y="${pt.y}" fill="#f472b6" font-size="10" text-anchor="middle" dominant-baseline="central">${getPlanetIcon(p.name)}</text>`;
+                });
+            }
+
+            svg += `</svg>`;
+            container.innerHTML = svg;
+            
+            const card = document.getElementById('synastry-wheel-card');
+            if (card) card.classList.remove('hidden');
+        }
+
+        function saveToLocalStorage(name, payload, resultData) {
+            let history = JSON.parse(localStorage.getItem('astrology_history') || '[]');
+            history.unshift({ id: Date.now(), name, date: new Date().toLocaleDateString(), payload, resultData });
+            localStorage.setItem('astrology_history', JSON.stringify(history.slice(0, 10)));
+        }
+
+        function renderHistoryUI() {
+            const container = document.getElementById('history-list');
+            let history = JSON.parse(localStorage.getItem('astrology_history') || '[]');
+            const currentLang = document.getElementById('langSwitch').value;
+
+            if (history.length === 0) {
+                let noHistoryMsg = "No hay cartas guardadas aún en el historial.";
+                if (currentLang === 'en') noHistoryMsg = "No charts saved in history yet.";
+                else if (currentLang === 'it') noHistoryMsg = "Nessun tema salvato nella cronologia.";
+                else if (currentLang === 'fr') noHistoryMsg = "Aucun thème enregistré dans l'historique pour le moment.";
+                else if (currentLang === 'pt') noHistoryMsg = "Nenhum mapa salvo no histórico ainda.";
+
+                container.innerHTML = `<div class="text-slate-500 text-xs py-8 col-span-full text-center">${noHistoryMsg}</div>`;
+                return;
+            }
+
+            container.innerHTML = '';
+            history.forEach(item => {
+                const sun = item.resultData.planets.find(p => p.name === 'Sun');
+                const asc = item.resultData.angles ? item.resultData.angles.Ascendant : null;
+                
+                let loadBtnText = "🔄 Cargar Datos";
+                if (currentLang === 'en') loadBtnText = "🔄 Load Data";
+                else if (currentLang === 'it') loadBtnText = "🔄 Carica Dati";
+                else if (currentLang === 'fr') loadBtnText = "🔄 Charger les Données";
+                else if (currentLang === 'pt') loadBtnText = "🔄 Carregar Dados";
+
+                const card = document.createElement('div');
+                card.className = "bg-slate-900/80 border border-slate-700/60 p-4 rounded-xl flex flex-col justify-between space-y-3";
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <h4 class="font-bold text-slate-200 text-sm">${item.name}</h4>
+                            <span class="text-[10px] text-slate-500">${item.date}</span>
+                        </div>
+                        <div class="text-xs text-purple-300">☀️ ${sun ? sun.sign : '-'} | 🌅 Asc: ${asc ? asc.sign : '-'}</div>
+                    </div>
+                    <button onclick="loadFromHistory(${item.id})" class="w-full text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 py-1.5 rounded transition-colors border border-slate-700">
+                        ${loadBtnText}
+                    </button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function loadFromHistory(id) {
+            let history = JSON.parse(localStorage.getItem('astrology_history') || '[]');
+            const item = history.find(x => x.id === id);
+            if (!item) return;
+
+            document.getElementById('person-name').value = item.name;
+            document.getElementById('year').value = item.payload.year;
+            document.getElementById('month').value = item.payload.month;
+            document.getElementById('day').value = item.payload.day;
+
+            switchTab('chart');
+            lastResponseData = item.resultData;
+            renderResults(item.resultData);
+            drawAstrologicalWheel(item.resultData);
+        }
+
+        function clearHistory() {
+            localStorage.removeItem('astrology_history');
+            renderHistoryUI();
+        }
+
+        function renderResults(data) {
+            document.getElementById('json-output').textContent = JSON.stringify(data, null, 2);
+
+            if (data.angles) {
+                document.getElementById('angles-card').classList.remove('hidden');
+                document.getElementById('ang-asc').textContent = `${data.angles.Ascendant.sign} ${data.angles.Ascendant.sign_deg}°`;
+                document.getElementById('ang-mc').textContent = `${data.angles.Midheaven.sign} ${data.angles.Midheaven.sign_deg}°`;
+                document.getElementById('ang-dc').textContent = `${data.angles.Descendant.sign} ${data.angles.Descendant.sign_deg}°`;
+                document.getElementById('ang-ic').textContent = `${data.angles.IC.sign} ${data.angles.IC.sign_deg}°`;
+            }
+
+            const pBody = document.getElementById('planets-table-body');
+            pBody.innerHTML = '';
+            const currentLang = document.getElementById('langSwitch').value;
+            
+            let directText = "Directo";
+            if (currentLang === 'en') directText = "Direct";
+            else if (currentLang === 'it') directText = "Diretto";
+            else if (currentLang === 'fr') directText = "Direct";
+            else if (currentLang === 'pt') directText = "Direto";
+
+            data.planets.forEach(p => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-800/30 transition-colors";
+                tr.innerHTML = `
+                    <td class="px-6 py-3 font-medium text-slate-200 flex items-center gap-2">
+                        <span>${getPlanetIcon(p.name)}</span>
+                        <span>${p.name}</span>
+                    </td>
+                    <td class="px-6 py-3 text-purple-300 font-medium">${p.sign}</td>
+                    <td class="px-6 py-3 font-mono text-slate-300">${p.sign_deg.toFixed(2)}°</td>
+                    <td class="px-6 py-3">${p.is_retrograde ? '<span class="text-xs bg-red-950/60 text-red-400 border border-red-800 px-2 py-0.5 rounded">Rx</span>' : `<span class="text-xs text-slate-500">${directText}</span>`}</td>
+                `;
+                pBody.appendChild(tr);
+            });
+        }
+
+        function drawAstrologicalWheel(data) {
+            const container = document.getElementById('chart-wheel-container');
+            const ascDeg = data.angles ? data.angles.Ascendant.abs_deg : 0;
+            const size = 460;
+            const center = size / 2;
+            const radius = 200;
+            const innerRadius = 140;
+
+            const zodiacSymbols = ["♈", "♉", "♊", "♋", "♌", "♍", "♎", "♏", "♐", "♑", "♒", "♓"];
+            const elementColors = ["#ef4444", "#10b981", "#3b82f6", "#f59e0b"];
+
+            let svg = `<svg viewBox="0 0 ${size} ${size}" class="w-full h-full">`;
+            svg += `<circle cx="${center}" cy="${center}" r="${radius}" fill="none" stroke="#475569" stroke-width="2"/>`;
+            svg += `<circle cx="${center}" cy="${center}" r="${innerRadius}" fill="#0f172a" stroke="#334155" stroke-width="2"/>`;
+
+            function getCoords(deg, r) {
+                const rad = (180 - (deg - ascDeg)) * (Math.PI / 180);
+                return { x: center + r * Math.cos(rad), y: center - r * Math.sin(rad) };
+            }
+
+            for (let i = 0; i < 12; i++) {
+                const startDeg = i * 30;
+                const p1 = getCoords(startDeg, radius);
+                const p2 = getCoords(startDeg, innerRadius);
+                svg += `<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="#334155" stroke-width="1.5"/>`;
+
+                const midCoords = getCoords(startDeg + 15, (radius + innerRadius) / 2);
+                svg += `<text x="${midCoords.x}" y="${midCoords.y}" fill="${elementColors[i % 4]}" font-size="16" font-weight="bold" text-anchor="middle" dominant-baseline="central">${zodiacSymbols[i]}</text>`;
+            }
+
+            if (data.houses) {
+                data.houses.forEach(h => {
+                    const p1 = getCoords(h.abs_deg, innerRadius);
+                    const p2 = getCoords(h.abs_deg, innerRadius - 35);
+                    svg += `<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="#94a3b8" stroke-dasharray="3,3" stroke-width="1.5"/>`;
+                });
+            }
+
+            if (data.aspects && data.planets) {
+                const pMap = {};
+                data.planets.forEach(p => pMap[p.name] = p.abs_deg);
+
+                data.aspects.forEach(asp => {
+                    if (pMap[asp.p1] !== undefined && pMap[asp.p2] !== undefined) {
+                        const pt1 = getCoords(pMap[asp.p1], innerRadius - 35);
+                        const pt2 = getCoords(pMap[asp.p2], innerRadius - 35);
+                        
+                        const isHard = asp.aspect === "Square" || asp.aspect === "Opposition";
+                        const strokeColor = isHard ? "#ef4444" : "#06b6d4";
+
+                        svg += `<line x1="${pt1.x}" y1="${pt1.y}" x2="${pt2.x}" y2="${pt2.y}" stroke="${strokeColor}" stroke-width="1" opacity="0.6"/>`;
+                    }
+                });
+            }
+
+            if (data.planets) {
+                data.planets.forEach(p => {
+                    const pt = getCoords(p.abs_deg, innerRadius - 18);
+                    svg += `<circle cx="${pt.x}" cy="${pt.y}" r="11" fill="#1e293b" stroke="#818cf8" stroke-width="1"/>`;
+                    svg += `<text x="${pt.x}" y="${pt.y}" font-size="11" fill="#f8fafc" text-anchor="middle" dominant-baseline="central">${getPlanetIcon(p.name)}</text>`;
+                });
+            }
+
+            const acPt = getCoords(ascDeg, radius + 10);
+            const dcPt = getCoords((ascDeg + 180) % 360, radius + 10);
+            svg += `<line x1="${acPt.x}" y1="${acPt.y}" x2="${dcPt.x}" y2="${dcPt.y}" stroke="#a855f7" stroke-width="2.5"/>`;
+            
+            svg += `</svg>`;
+            container.innerHTML = svg;
+        }
+
+        function getPlanetIcon(name) {
+            const icons = {
+                'Sun': '☀️', 'Moon': '🌙', 'Mercury': '☿', 'Venus': '♀',
+                'Mars': '♂', 'Jupiter': '♃', 'Saturn': '♄', 'Uranus': '♅',
+                'Neptune': '♆', 'Pluto': '♇', 'Mean Node': '☊'
+            };
+            return icons[name] || '🪐';
+        }
+
+        function copyJson() {
+            if (!lastResponseData) return;
+            navigator.clipboard.writeText(JSON.stringify(lastResponseData, null, 2));
+            const currentLang = document.getElementById('langSwitch').value;
+            let msg = "JSON copiado al portapapeles.";
+            if (currentLang === 'en') msg = "JSON copied to clipboard.";
+            else if (currentLang === 'it') msg = "JSON copiato negli appunti.";
+            else if (currentLang === 'fr') msg = "JSON copié dans le presse-papiers.";
+            else if (currentLang === 'pt') msg = "JSON copiado para a área de transferência.";
+            alert(msg);
+        }
+
+        function handlePdfAction() {
+            const element = document.getElementById('report-content');
+            element.classList.add('pdf-export-mode');
+
+            const opt = {
+                margin:       10,
+                filename:     'astrology_report.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true, logging: false, letterRendering: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().from(element).set(opt).save().then(() => {
+                element.classList.remove('pdf-export-mode');
+            }).catch(err => {
+                console.error(err);
+                element.classList.remove('pdf-export-mode');
+            });
+        }
+
+        function handleWhatsAppAction() {
+            const currentLang = document.getElementById('langSwitch').value;
+            let message = "✨ *Reporte de Astrology Engine* ✨\n\n";
+            if (currentLang === 'en') message = "✨ *Astrology Engine Report* ✨\n\n";
+            else if (currentLang === 'it') message = "✨ *Rapporto di Astrology Engine* ✨\n\n";
+            else if (currentLang === 'fr') message = "✨ *Rapport d'Astrology Engine* ✨\n\n";
+            else if (currentLang === 'pt') message = "✨ *Relatório do Astrology Engine* ✨\n\n";
+            
+            if (activeTabName === 'chart' && lastResponseData) {
+                let defaultName = "Mi Carta";
+                if (currentLang === 'en') defaultName = "My Chart";
+                else if (currentLang === 'it') defaultName = "La Mia Carta";
+                else if (currentLang === 'fr') defaultName = "Mon Thème";
+                else if (currentLang === 'pt') defaultName = "Meu Mapa";
+
+                const name = document.getElementById('person-name').value || defaultName;
+                const sun = lastResponseData.planets.find(p => p.name === 'Sun');
+                const asc = lastResponseData.angles ? lastResponseData.angles.Ascendant : null;
+                
+                let chartTitle = `📊 Carta Natal de: *${name}*\n`;
+                if (currentLang === 'en') chartTitle = `📊 Natal Chart for: *${name}*\n`;
+                else if (currentLang === 'it') chartTitle = `📊 Carta Natale di: *${name}*\n`;
+                else if (currentLang === 'fr') chartTitle = `📊 Thème Natal de : *${name}*\n`;
+                else if (currentLang === 'pt') chartTitle = `📊 Mapa Natal de: *${name}*\n`;
+
+                message += chartTitle;
+                
+                let sunLabel = "Sol en";
+                if (currentLang === 'en') sunLabel = "Sun in";
+                else if (currentLang === 'it') sunLabel = "Sole in";
+                else if (currentLang === 'fr') sunLabel = "Soleil en";
+                else if (currentLang === 'pt') sunLabel = "Sol em";
+
+                let ascLabel = "Ascendente";
+                if (currentLang === 'en') ascLabel = "Ascendant";
+                else if (currentLang === 'it') ascLabel = "Ascendente";
+                else if (currentLang === 'fr') ascLabel = "Ascendant";
+                else if (currentLang === 'pt') ascLabel = "Ascendente";
+
+                message += `• ☀️ ${sunLabel}: ${sun ? sun.sign + ' (' + sun.sign_deg.toFixed(2) + '°)' : '-' }\n`;
+                message += `• 🌅 ${ascLabel}: ${asc ? asc.sign + ' (' + asc.sign_deg.toFixed(2) + '°)' : '-' }\n\n`;
+                
+                let mainPosLabel = "Posiciones Principales:";
+                if (currentLang === 'en') mainPosLabel = "Main Positions:";
+                else if (currentLang === 'it') mainPosLabel = "Posizioni Principali:";
+                else if (currentLang === 'fr') mainPosLabel = "Positions Principales:";
+                else if (currentLang === 'pt') mainPosLabel = "Posições Principais:";
+
+                message += `🪐 *${mainPosLabel}*\n`;
+                lastResponseData.planets.slice(0, 6).forEach(p => {
+                    message += `• ${getPlanetIcon(p.name)} ${p.name}: ${p.sign} (${p.sign_deg.toFixed(1)}°)\n`;
+                });
+
+                let webConsult = "¡Consulta la aplicación web para ver todos los detalles y aspectos!";
+                if (currentLang === 'en') webConsult = "Check out the web app to see all details and aspects!";
+                else if (currentLang === 'it') webConsult = "Consulta l'applicazione web per vedere tutti i dettagli e gli aspetti!";
+                else if (currentLang === 'fr') webConsult = "Consultez l'application web pour voir tous les détails et aspects !";
+                else if (currentLang === 'pt') webConsult = "Consulte o aplicativo web para ver todos os detalhes e aspectos!";
+
+                message += `\n_${webConsult}_`;
+            } else if (activeTabName === 'synastry' && lastSynastryData) {
+                const scoreMatch = document.querySelector('#synastry-result span');
+                const scoreText = scoreMatch ? scoreMatch.textContent : "96% Compatibilidad Astrológica";
+                const synData = lastSynastryData.data;
+                const sunA = synData.chart_a.planets.find(p => p.name === 'Sun');
+                const sunB = synData.chart_b.planets.find(p => p.name === 'Sun');
+                const venusB_in_A = synData.overlays_b_in_a ? synData.overlays_b_in_a.find(o => o.planet === 'Venus') : null;
+
+                let synTitle = "Sinastría de Pareja";
+                if (currentLang === 'en') synTitle = "Couple Synastry";
+                else if (currentLang === 'it') synTitle = "Sinastria di Coppia";
+                else if (currentLang === 'fr') synTitle = "Synastrie de Couple";
+                else if (currentLang === 'pt') synTitle = "Sinastria de Casal";
+
+                let bondLabel = "Vínculo";
+                if (currentLang === 'en') bondLabel = "Bond";
+                else if (currentLang === 'it') bondLabel = "Legame";
+                else if (currentLang === 'fr') bondLabel = "Lien";
+                else if (currentLang === 'pt') bondLabel = "Vínculo";
+
+                message += `💞 *${synTitle}*\n`;
+                message += `👥 ${bondLabel}: *${lastSynastryData.nameA} & ${lastSynastryData.nameB}*\n`;
+                message += `📌 ${scoreText}\n\n`;
+                message += `• ☀️ Sun ${lastSynastryData.nameA}: ${sunA ? sunA.sign : '-'}\n`;
+                message += `• ☀️ Sun ${lastSynastryData.nameB}: ${sunB ? sunB.sign : '-'}\n`;
+                if (venusB_in_A) {
+                    message += `• ♀️ Venus of ${lastSynastryData.nameB} in House ${venusB_in_A.house_in_a} of ${lastSynastryData.nameA}\n`;
+                }
+
+                let successMsg = "¡Análisis profundo de compatibilidad realizado con éxito!";
+                if (currentLang === 'en') successMsg = "Deep compatibility analysis successfully completed!";
+                else if (currentLang === 'it') successMsg = "Analisi profonda della compatibilità completata con successo!";
+                else if (currentLang === 'fr') successMsg = "Analyse approfondie de la compatibilité terminée avec succès !";
+                else if (currentLang === 'pt') successMsg = "Análise profunda de compatibilidade concluída com sucesso!";
+
+                message += `\n✨ ${successMsg}`;
+            } else if (activeTabName === 'transits' && lastTransitData) {
+                let transTitle = "Clima y Tránsitos Astrológicos";
+                if (currentLang === 'en') transTitle = "Climate & Astrological Transits";
+                else if (currentLang === 'it') transTitle = "Clima e Transiti Astrologici";
+                else if (currentLang === 'fr') transTitle = "Climat et Transits Astrologiques";
+                else if (currentLang === 'pt') transTitle = "Clima e Trânsitos Astrológicos";
+
+                let dateLabel = "Fecha";
+                if (currentLang === 'en') dateLabel = "Date";
+                else if (currentLang === 'it') dateLabel = "Data";
+                else if (currentLang === 'fr') dateLabel = "Date";
+                else if (currentLang === 'pt') dateLabel = "Data";
+
+                message += `🌟 *${transTitle}*\n`;
+                message += `📅 ${dateLabel}: *${lastTransitData.date}*\n\n`;
+                
+                let curPlanetsLabel = "Posiciones Planetarias Actuales:";
+                if (currentLang === 'en') curPlanetsLabel = "Current Planetary Positions:";
+                else if (currentLang === 'it') curPlanetsLabel = "Posizioni Planetarie Attuali:";
+                else if (currentLang === 'fr') curPlanetsLabel = "Positions Planétaires Actuelles :";
+                else if (currentLang === 'pt') curPlanetsLabel = "Posições Planetárias Atuais:";
+
+                message += `🪐 *${curPlanetsLabel}*\n`;
+                lastTransitData.data.planets.forEach(p => {
+                    message += `• ${getPlanetIcon(p.name)} ${p.name}: *${p.sign}* (${p.sign_deg.toFixed(1)}°) ${p.is_retrograde ? '(Rx)' : ''}\n`;
+                });
+
+                let daySuccess = "¡Energía del día calculada con éxito!";
+                if (currentLang === 'en') daySuccess = "Day energy successfully calculated!";
+                else if (currentLang === 'it') daySuccess = "Energia della giornata calcolata con successo!";
+                else if (currentLang === 'fr') daySuccess = "Énergie du jour calculée avec succès !";
+                else if (currentLang === 'pt') daySuccess = "Energia do dia calculada com sucesso!";
+
+                message += `\n✨ ${daySuccess}`;
+            } else {
+                message += currentLang === 'en' ? "Check out my astrological results!" : "¡Consulta mis resultados astrológicos!";
+            }
+
+            const encodedMessage = encodeURIComponent(message);
+            const url = `https://api.whatsapp.com/send?text=${encodedMessage}`;
+            window.open(url, '_blank');
+        }
+    </script>
+</body>
+</html>
