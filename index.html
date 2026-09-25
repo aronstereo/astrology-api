@@ -1128,14 +1128,52 @@
         }
 
         function handleWhatsAppAction() {
-            let text = "✨ ¡Hola! Aquí te comparto mi reporte astrológico generado con Astrology Engine.";
-            if (lastResponseData && lastResponseData.planets) {
-                const sun = lastResponseData.planets.find(p => p.name === 'Sun');
-                const asc = lastResponseData.angles ? lastResponseData.angles.Ascendant : null;
-                if (sun && asc) {
-                    text = `✨ Mi Carta Natal (Astrology Engine):\n☀️ Sol en ${sun.sign} (${sun.sign_deg.toFixed(1)}°)\n🌅 Ascendente en ${asc.sign} (${asc.sign_deg.toFixed(1)}°)`;
+            let text = "✨ *Reporte Astrológico - Astrology Engine* ✨\n\n";
+
+            // Si estás en la pestaña de Carta Natal y hay datos
+            if (activeTabName === 'chart' && lastResponseData) {
+                const nameInput = document.getElementById('person-name')?.value || 'Mi Carta Natal';
+                text += `👤 *Carta Natal:* ${nameInput}\n\n`;
+
+                // Agregar Ejes Principales (Ángulos)
+                if (lastResponseData.angles) {
+                    const asc = lastResponseData.angles.Ascendant;
+                    const mc = lastResponseData.angles.Midheaven;
+                    const dc = lastResponseData.angles.Descendant;
+                    const ic = lastResponseData.angles.IC;
+                    text += `🌟 *Ejes Principales:*\n`;
+                    if (asc) text += `• Ascendente (AC): ${asc.sign} ${asc.sign_deg.toFixed(1)}°\n`;
+                    if (mc) text += `• Medio Cielo (MC): ${mc.sign} ${mc.sign_deg.toFixed(1)}°\n`;
+                    if (dc) text += `• Descendente (DC): ${dc.sign} ${dc.sign_deg.toFixed(1)}°\n`;
+                    if (ic) text += `• Fondo Cielo (IC): ${ic.sign} ${ic.sign_deg.toFixed(1)}°\n\n`;
                 }
+
+                // Agregar Posiciones Planetarias completas
+                if (lastResponseData.planets && lastResponseData.planets.length > 0) {
+                    text += `🪐 *Posiciones Planetarias:*\n`;
+                    lastResponseData.planets.forEach(p => {
+                        const icon = getPlanetIcon(p.name);
+                        const rx = p.is_retrograde ? ' (Rx)' : '';
+                        text += `• ${icon} ${p.name}: ${p.sign} ${p.sign_deg.toFixed(1)}°${rx}\n`;
+                    });
+                }
+            } 
+            // Si estás en Sinastría
+            else if (activeTabName === 'synastry' && lastSynastryData) {
+                text += `💞 *Sinastría de Pareja*\n`;
+                text += `• Comparativa entre ${lastSynastryData.nameA} y ${lastSynastryData.nameB}\n`;
             }
+            // Si estás en Tránsitos
+            else if (activeTabName === 'transits' && lastTransitData) {
+                text += `🌟 *Clima Astrológico y Tránsitos*\n`;
+                text += `• Fecha: ${lastTransitData.date}\n`;
+            } else {
+                text += `¡Hola! Aquí te comparto mi análisis astrológico.`;
+            }
+
+            text += `\n_Generado con Astrology Engine_`;
+
+            // Abrir WhatsApp con el texto completo codificado de forma segura
             window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
         }
     </script>
