@@ -89,9 +89,10 @@ class AstrologyEngine:
         planets_result = []
         for p_id, p_name in PLANETS:
             calc_res = swe.calc_ut(jd, p_id)
-            res = calc_res[0] if isinstance(calc_res[0], (tuple, list)) else calc_res
-            lon_abs = res[0]
-            speed = res[3]
+            # Extracción segura de la tupla devuelta por swisseph
+            res = calc_res[0] if isinstance(calc_res, (tuple, list)) and len(calc_res) > 0 else calc_res
+            lon_abs = float(res[0])
+            speed = float(res[3]) if len(res) > 3 else 0.0
 
             z_info = cls.get_zodiac_position(lon_abs)
             planets_result.append({
