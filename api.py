@@ -22,7 +22,7 @@ client = genai.Client(api_key=GEMINI_API_KEY) if GEMINI_API_KEY else genai.Clien
 app = FastAPI(
     title="Astrology Engine API",
     description="API para el cálculo de cartas natales, sinastría e interpretaciones profundas con IA y Caché",
-    version="1.6.0"
+    version="1.6.1"
 )
 
 app.add_middleware(
@@ -192,7 +192,7 @@ def get_deep_interpretation(req: InterpretationRequest):
                 "texto": row[0]
             }
 
-        # 3. Fallback: Llamada a Google Gemini utilizando el nuevo SDK `google-genai`
+        # 3. Fallback: Llamada a Google Gemini utilizando el modelo compatible `gemini-2.0-flash`
         prompt_sistema = (
             "Eres un astrólogo profesional experto en astrología psicológica y transpersonal. "
             "Genera una interpretación profunda, empática y reveladora dividida claramente en cuatro partes: "
@@ -204,9 +204,9 @@ def get_deep_interpretation(req: InterpretationRequest):
             f"ubicado en la Casa {req.house}. Firma de aspectos clave: {aspect_signature}."
         )
 
-        # Utilizando la clase y método moderno del SDK unificado de GenAI
+        # Usando el modelo estable `gemini-2.0-flash`
         response = client.models.generate_content(
-            model="gemini-2.5-flash",
+            model="gemini-2.0-flash",
             contents=prompt_usuario,
             config={
                 "system_instruction": prompt_sistema,
