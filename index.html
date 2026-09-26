@@ -14,7 +14,7 @@
         .pdf-export-mode text { fill: #0f172a !important; }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen font-sans">
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans antialiased">
 
     <!-- Header / Navbar -->
     <header class="border-b border-slate-800 bg-slate-950/80 backdrop-blur sticky top-0 z-50">
@@ -25,7 +25,7 @@
                     Astrology Engine
                 </h1>
             </div>
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 flex-wrap">
                 <!-- Selector de Idioma -->
                 <div class="flex items-center gap-1.5 bg-slate-800/80 px-2.5 py-1 rounded-lg border border-slate-700">
                     <span class="text-xs">🌐</span>
@@ -47,7 +47,7 @@
                     </button>
                 </div>
                 <div id="status-badge" class="flex items-center space-x-2 text-xs px-3 py-1 rounded-full bg-emerald-950/50 text-emerald-400 border border-emerald-800/50">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                     <span data-i18n="apiConnected">API Conectada</span>
                 </div>
             </div>
@@ -58,7 +58,7 @@
     <main class="max-w-7xl mx-auto px-4 py-8" id="report-content">
 
         <!-- Tabs Navigation -->
-        <div class="flex border-b border-slate-800 mb-8 space-x-2 overflow-x-auto" id="nav-tabs">
+        <div class="flex border-b border-slate-800 mb-8 space-x-2 overflow-x-auto scrollbar-none" id="nav-tabs">
             <button onclick="switchTab('chart')" id="tab-btn-chart" class="px-5 py-3 font-medium text-sm border-b-2 border-purple-500 text-purple-400 transition-all whitespace-nowrap">
                 📊 <span data-i18n="tabChart">Carta Natal</span>
             </button>
@@ -191,7 +191,7 @@
                     <div class="bg-slate-800/50 border border-slate-700/50 p-4 rounded-2xl shadow-xl flex flex-col items-center">
                         <h3 class="font-semibold text-slate-200 self-start mb-2">🔮 <span data-i18n="wheelTitle">Rueda Astrológica</span></h3>
                         <div id="chart-wheel-container" class="w-full max-w-[500px] aspect-square flex items-center justify-center">
-                            <div class="text-slate-500 text-xs" data-i18n="wheelPlaceholder">Completa los datos y haz clic en "Calcular Carta Natal"</div>
+                            <div class="text-slate-500 text-xs text-center p-6" data-i18n="wheelPlaceholder">Completa los datos y haz clic en "Calcular Carta Natal"</div>
                         </div>
                     </div>
 
@@ -237,7 +237,7 @@
                             <input type="number" id="syn-a-month" data-i18n-placeholder="placeholderMonth" placeholder="Mes" min="1" max="12" class="bg-slate-800 border border-slate-700 p-2 rounded focus:outline-none focus:border-purple-500">
                             <input type="number" id="syn-a-day" data-i18n-placeholder="placeholderDay" placeholder="Día" min="1" max="31" class="bg-slate-800 border border-slate-700 p-2 rounded focus:outline-none focus:border-purple-500">
                         </div>
-                        <input type="time" id="syn-a-time" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-xs focus:outline-none focus:border-purple-500">
+                        <input type="time" id="syn-a-time" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-xs text-slate-200 focus:outline-none focus:border-purple-500">
                     </div>
 
                     <!-- Persona B -->
@@ -249,22 +249,15 @@
                             <input type="number" id="syn-b-month" data-i18n-placeholder="placeholderMonth" placeholder="Mes" min="1" max="12" class="bg-slate-800 border border-slate-700 p-2 rounded focus:outline-none focus:border-pink-500">
                             <input type="number" id="syn-b-day" data-i18n-placeholder="placeholderDay" placeholder="Día" min="1" max="31" class="bg-slate-800 border border-slate-700 p-2 rounded focus:outline-none focus:border-pink-500">
                         </div>
-                        <input type="time" id="syn-b-time" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-xs focus:outline-none focus:border-pink-500">
+                        <input type="time" id="syn-b-time" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-xs text-slate-200 focus:outline-none focus:border-pink-500">
                     </div>
                 </div>
 
-                <button onclick="handleCalculateSynastry()" id="btn-synastry-submit" class="w-full bg-pink-600 hover:bg-pink-500 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition duration-200" data-i18n="btnCalculateSynastry">
+                <button onclick="handleCalculateSynastry()" id="btn-synastry-submit" class="w-full bg-pink-600 hover:bg-pink-500 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition duration-200 cursor-pointer" data-i18n="btnCalculateSynastry">
                     Calcular Compatibilidad de Pareja
                 </button>
 
                 <div id="synastry-result" class="hidden bg-slate-900/80 p-6 rounded-xl border border-slate-800 space-y-6 mt-6"></div>
-
-                <div id="synastry-interpretation-card" class="hidden bg-slate-800/50 border border-slate-700/50 p-6 rounded-2xl shadow-xl space-y-4 mt-6">
-                    <h3 class="font-semibold text-slate-200 text-base flex items-center gap-2">
-                        <span>📖</span> <span data-i18n="synastryInterpTitle">Interpretación Profunda del Vínculo</span>
-                    </h3>
-                    <div id="synastry-interpretation-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-                </div>
 
                 <div id="synastry-wheel-card" class="hidden bg-slate-800/50 border border-slate-700/50 p-6 rounded-2xl shadow-xl flex flex-col items-center mt-6">
                     <h3 class="font-semibold text-slate-200 self-start mb-2">💞 <span data-i18n="synastryWheelTitle">Rueda de Sinastría (Doble Anillo)</span></h3>
@@ -283,7 +276,7 @@
                         </h2>
                         <p class="text-xs text-slate-400" data-i18n="transitsSubtitle">Analiza el movimiento del cielo actual y su impacto en tu carta natal.</p>
                     </div>
-                    <button onclick="calculateTransits()" id="btn-transits" class="bg-purple-600 hover:bg-purple-500 text-white font-medium px-5 py-2.5 rounded-xl text-xs transition-colors shadow-lg shadow-purple-600/30" data-i18n="btnCalculateTransits">
+                    <button onclick="calculateTransits()" id="btn-transits" class="bg-purple-600 hover:bg-purple-500 text-white font-medium px-5 py-2.5 rounded-xl text-xs transition-colors shadow-lg shadow-purple-600/30 cursor-pointer" data-i18n="btnCalculateTransits">
                         🔄 Calcular Tránsitos de Hoy
                     </button>
                 </div>
@@ -331,7 +324,7 @@
             <div class="bg-slate-800/50 border border-slate-700/50 p-6 rounded-2xl shadow-xl space-y-4">
                 <div class="flex justify-between items-center">
                     <h2 class="text-lg font-semibold text-slate-200" data-i18n="historyMainTitle">📁 Registros Astrológicos Guardados</h2>
-                    <button onclick="clearHistory()" class="text-xs bg-rose-950/60 hover:bg-rose-900 text-rose-300 border border-rose-800 px-3 py-1.5 rounded-lg transition-colors" data-i18n="btnClearHistory">
+                    <button onclick="clearHistory()" class="text-xs bg-rose-950/60 hover:bg-rose-900 text-rose-300 border border-rose-800 px-3 py-1.5 rounded-lg transition-colors cursor-pointer" data-i18n="btnClearHistory">
                         🗑️ Borrar Historial
                     </button>
                 </div>
@@ -346,7 +339,7 @@
             <div class="bg-slate-800/50 border border-slate-700/50 p-6 rounded-2xl shadow-xl">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-lg font-semibold text-slate-200" data-i18n="rawJsonTitle">JSON Devuelto por la API</h2>
-                    <button onclick="copyJson()" class="text-xs bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded text-slate-200 transition-colors" data-i18n="btnCopyJson">
+                    <button onclick="copyJson()" class="text-xs bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded text-slate-200 transition-colors cursor-pointer" data-i18n="btnCopyJson">
                         📋 Copiar JSON
                     </button>
                 </div>
@@ -410,7 +403,6 @@
                 personB: "Persona B",
                 placeholderPersonB: "Nombre o Persona B",
                 btnCalculateSynastry: "Calcular Compatibilidad de Pareja",
-                synastryInterpTitle: "Interpretación Profunda del Vínculo",
                 synastryWheelTitle: "Rueda de Sinastría (Doble Anillo)",
                 transitsMainTitle: "Clima Astrológico y Tránsitos de Hoy",
                 transitsSubtitle: "Analiza el movimiento del cielo actual y su impacto en tu carta natal.",
@@ -468,7 +460,6 @@
                 personB: "Person B",
                 placeholderPersonB: "Name or Person B",
                 btnCalculateSynastry: "Calculate Couple Compatibility",
-                synastryInterpTitle: "Deep Bond Interpretation",
                 synastryWheelTitle: "Synastry Wheel (Double Ring)",
                 transitsMainTitle: "Astrological Climate & Today's Transits",
                 transitsSubtitle: "Analyze current sky movements and their impact on your natal chart.",
@@ -526,7 +517,6 @@
                 personB: "Persona B",
                 placeholderPersonB: "Nome o Persona B",
                 btnCalculateSynastry: "Calcola Compatibilità di Coppia",
-                synastryInterpTitle: "Interpretazione Profonda del Legame",
                 synastryWheelTitle: "Ruota di Sinastria (Doppio Anello)",
                 transitsMainTitle: "Clima Astrologico e Transiti di Oggi",
                 transitsSubtitle: "Analizza il movimento del cielo attuale e il suo impatto sul tuo tema natale.",
@@ -584,7 +574,6 @@
                 personB: "Personne B",
                 placeholderPersonB: "Nom ou Personne B",
                 btnCalculateSynastry: "Calculer la Compatibilité de Couple",
-                synastryInterpTitle: "Interprétation Profonde du Lien",
                 synastryWheelTitle: "Roue de Synastrie (Double Anneau)",
                 transitsMainTitle: "Climat Astrologique et Transits du Jour",
                 transitsSubtitle: "Analysez le mouvement du ciel actuel et son impact sur votre thème natal.",
@@ -642,7 +631,6 @@
                 personB: "Pessoa B",
                 placeholderPersonB: "Nome ou Pessoa B",
                 btnCalculateSynastry: "Calcular Compatibilidade do Casal",
-                synastryInterpTitle: "Interpretação Profunda do Vínculo",
                 synastryWheelTitle: "Roda de Sinastria (Anel Duplo)",
                 transitsMainTitle: "Clima Astrológico e Tránsitos de Hoje",
                 transitsSubtitle: "Analise o movimento do céu atual e o seu impacto no seu mapa natal.",
@@ -680,7 +668,7 @@
                 badge.className = "flex items-center space-x-2 text-xs px-3 py-1 rounded-full bg-emerald-950/50 text-emerald-400 border border-emerald-800";
                 const currentLang = document.getElementById('langSwitch').value;
                 let apiText = (currentLang === 'en') ? "API Connected" : (currentLang === 'it') ? "API Connessa" : (currentLang === 'fr') ? "API Connectée" : (currentLang === 'pt') ? "API Conectada" : "API Conectada";
-                badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span><span>${apiText}</span>`;
+                badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span><span>${apiText}</span>`;
             }
         }
         checkApiStatus();
@@ -998,7 +986,7 @@
                         </div>
                         <div class="text-xs text-purple-300">☀️ ${sun ? sun.sign : '-'} | 🌅 Asc: ${asc ? asc.sign : '-'}</div>
                     </div>
-                    <button onclick="loadFromHistory(${item.id})" class="w-full text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 py-1.5 rounded transition-colors border border-slate-700">
+                    <button onclick="loadFromHistory(${item.id})" class="w-full text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 py-1.5 rounded transition-colors border border-slate-700 cursor-pointer">
                         🔄 Cargar Datos
                     </button>
                 `;
@@ -1130,12 +1118,10 @@
         function handleWhatsAppAction() {
             let text = "✨ *Reporte Astrológico - Astrology Engine* ✨\n\n";
 
-            // Si estás en la pestaña de Carta Natal y hay datos
             if (activeTabName === 'chart' && lastResponseData) {
                 const nameInput = document.getElementById('person-name')?.value || 'Mi Carta Natal';
                 text += `👤 *Carta Natal:* ${nameInput}\n\n`;
 
-                // Agregar Ejes Principales (Ángulos)
                 if (lastResponseData.angles) {
                     const asc = lastResponseData.angles.Ascendant;
                     const mc = lastResponseData.angles.Midheaven;
@@ -1148,7 +1134,6 @@
                     if (ic) text += `• Fondo Cielo (IC): ${ic.sign} ${ic.sign_deg.toFixed(1)}°\n\n`;
                 }
 
-                // Agregar Posiciones Planetarias completas
                 if (lastResponseData.planets && lastResponseData.planets.length > 0) {
                     text += `🪐 *Posiciones Planetarias:*\n`;
                     lastResponseData.planets.forEach(p => {
@@ -1158,12 +1143,10 @@
                     });
                 }
             } 
-            // Si estás en Sinastría
             else if (activeTabName === 'synastry' && lastSynastryData) {
                 text += `💞 *Sinastría de Pareja*\n`;
                 text += `• Comparativa entre ${lastSynastryData.nameA} y ${lastSynastryData.nameB}\n`;
             }
-            // Si estás en Tránsitos
             else if (activeTabName === 'transits' && lastTransitData) {
                 text += `🌟 *Clima Astrológico y Tránsitos*\n`;
                 text += `• Fecha: ${lastTransitData.date}\n`;
@@ -1172,8 +1155,6 @@
             }
 
             text += `\n_Generado con Astrology Engine_`;
-
-            // Abrir WhatsApp con el texto completo codificado de forma segura
             window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
         }
     </script>
