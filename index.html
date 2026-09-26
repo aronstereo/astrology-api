@@ -7,46 +7,95 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
+        /* Skin Mística y Estilos Personalizados */
+        body {
+            background-color: #0b0f19;
+            background-image: radial-gradient(circle at 50% 20%, rgba(35, 20, 60, 0.8) 0%, rgba(11, 15, 25, 0.95) 70%), url('https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?q=80&w=1920&auto=format&fit=crop');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+        }
+        
         .tab-content { display: none; }
         .tab-content.active { display: block; }
+        
+        /* Contenedores con estética de pergamino estelar / cartas místicas */
+        .mystic-card {
+            background: rgba(18, 22, 36, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(212, 175, 55, 0.25);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(212, 175, 55, 0.05);
+            border-radius: 1rem;
+            position: relative;
+        }
+        
+        /* Pequeños adornos de esquinas para simular la skin de la imagen */
+        .mystic-card::before {
+            content: "✦";
+            position: absolute;
+            top: 8px;
+            left: 10px;
+            color: rgba(212, 175, 55, 0.4);
+            font-size: 10px;
+        }
+        .mystic-card::after {
+            content: "☪";
+            position: absolute;
+            top: 8px;
+            right: 10px;
+            color: rgba(212, 175, 55, 0.4);
+            font-size: 10px;
+        }
+
+        .mystic-input {
+            background: rgba(10, 13, 22, 0.85) !important;
+            border: 1px solid rgba(212, 175, 55, 0.3) !important;
+            color: #f3f4f6 !important;
+            border-radius: 0.75rem !important;
+        }
+        .mystic-input:focus {
+            border-color: rgba(212, 175, 55, 0.8) !important;
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+        }
+
         .pdf-export-mode { background-color: #ffffff !important; color: #0f172a !important; padding: 20px !important; }
-        .pdf-export-mode .bg-slate-800\/50, .pdf-export-mode .bg-slate-900\/60, .pdf-export-mode .bg-slate-950\/40 { background-color: #f8fafc !important; border-color: #e2e8f0 !important; color: #0f172a !important; }
+        .pdf-export-mode .mystic-card { background-color: #f8fafc !important; border-color: #e2e8f0 !important; color: #0f172a !important; }
         .pdf-export-mode text { fill: #0f172a !important; }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen font-sans antialiased">
+<body class="text-slate-100 min-h-screen font-sans antialiased">
 
     <!-- Header / Navbar -->
-    <header class="border-b border-slate-800 bg-slate-950/80 backdrop-blur sticky top-0 z-50">
+    <header class="border-b border-amber-500/20 bg-slate-950/70 backdrop-blur sticky top-0 z-50 shadow-lg">
         <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center flex-wrap gap-3">
             <div class="flex items-center space-x-3">
-                <span class="text-2xl">✨</span>
-                <h1 class="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
+                <span class="text-2xl drop-shadow-[0_0_8px_rgba(255,215,0,0.6)]">✨</span>
+                <h1 class="text-xl font-bold bg-gradient-to-r from-amber-200 via-purple-300 to-pink-400 bg-clip-text text-transparent drop-shadow">
                     Astrology Engine
                 </h1>
             </div>
             <div class="flex items-center gap-2 flex-wrap">
                 <!-- Selector de Idioma -->
-                <div class="flex items-center gap-1.5 bg-slate-800/80 px-2.5 py-1 rounded-lg border border-slate-700">
+                <div class="flex items-center gap-1.5 bg-slate-900/90 px-3 py-1.5 rounded-xl border border-amber-500/30 shadow-inner">
                     <span class="text-xs">🌐</span>
-                    <select id="langSwitch" onchange="changeLanguage(this.value)" class="bg-slate-900 text-slate-200 text-xs rounded px-1.5 py-0.5 outline-none border border-slate-700 cursor-pointer">
-                        <option value="es" selected>Español</option>
-                        <option value="en">English</option>
-                        <option value="it">Italiano</option>
-                        <option value="fr">Français</option>
-                        <option value="pt">Português</option>
+                    <select id="langSwitch" onchange="changeLanguage(this.value)" class="bg-transparent text-amber-200 text-xs rounded outline-none cursor-pointer">
+                        <option value="es" selected class="bg-slate-900">Español</option>
+                        <option value="en" class="bg-slate-900">English</option>
+                        <option value="it" class="bg-slate-900">Italiano</option>
+                        <option value="fr" class="bg-slate-900">Français</option>
+                        <option value="pt" class="bg-slate-900">Português</option>
                     </select>
                 </div>
 
                 <div id="action-buttons" class="hidden flex items-center gap-2">
-                    <button onclick="handleWhatsAppAction()" class="text-xs bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition font-medium shadow">
+                    <button onclick="handleWhatsAppAction()" class="text-xs bg-emerald-700/80 hover:bg-emerald-600 text-white px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition font-medium shadow border border-emerald-500/30">
                         <span>WhatsApp</span>
                     </button>
-                    <button onclick="handlePdfAction()" class="text-xs bg-purple-600 hover:bg-purple-500 text-white px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition font-medium shadow">
+                    <button onclick="handlePdfAction()" class="text-xs bg-purple-700/80 hover:bg-purple-600 text-white px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition font-medium shadow border border-purple-500/30">
                         <span>PDF</span>
                     </button>
                 </div>
-                <div id="status-badge" class="flex items-center space-x-2 text-xs px-3 py-1 rounded-full bg-emerald-950/50 text-emerald-400 border border-emerald-800/50">
+                <div id="status-badge" class="flex items-center space-x-2 text-xs px-3.5 py-1.5 rounded-xl bg-emerald-950/60 text-emerald-300 border border-emerald-600/40 shadow-inner">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                     <span data-i18n="apiConnected">API Conectada</span>
                 </div>
@@ -58,20 +107,20 @@
     <main class="max-w-7xl mx-auto px-4 py-8" id="report-content">
 
         <!-- Tabs Navigation -->
-        <div class="flex border-b border-slate-800 mb-8 space-x-2 overflow-x-auto scrollbar-none" id="nav-tabs">
-            <button onclick="switchTab('chart')" id="tab-btn-chart" class="px-5 py-3 font-medium text-sm border-b-2 border-purple-500 text-purple-400 transition-all whitespace-nowrap">
+        <div class="flex border-b border-amber-500/20 mb-8 space-x-2 overflow-x-auto scrollbar-none" id="nav-tabs">
+            <button onclick="switchTab('chart')" id="tab-btn-chart" class="px-5 py-3 font-medium text-sm border-b-2 border-amber-400 text-amber-200 transition-all whitespace-nowrap bg-amber-500/10 rounded-t-xl">
                 📊 <span data-i18n="tabChart">Carta Natal</span>
             </button>
-            <button onclick="switchTab('synastry')" id="tab-btn-synastry" class="px-5 py-3 font-medium text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-all whitespace-nowrap">
+            <button onclick="switchTab('synastry')" id="tab-btn-synastry" class="px-5 py-3 font-medium text-sm border-b-2 border-transparent text-slate-400 hover:text-amber-200 transition-all whitespace-nowrap">
                 💞 <span data-i18n="tabSynastry">Sinastría de Pareja</span>
             </button>
-            <button onclick="switchTab('transits')" id="tab-btn-transits" class="px-5 py-3 font-medium text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-all whitespace-nowrap">
+            <button onclick="switchTab('transits')" id="tab-btn-transits" class="px-5 py-3 font-medium text-sm border-b-2 border-transparent text-slate-400 hover:text-amber-200 transition-all whitespace-nowrap">
                 🌟 <span data-i18n="tabTransits">Tránsitos Actuales</span>
             </button>
-            <button onclick="switchTab('history')" id="tab-btn-history" class="px-5 py-3 font-medium text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-all whitespace-nowrap">
+            <button onclick="switchTab('history')" id="tab-btn-history" class="px-5 py-3 font-medium text-sm border-b-2 border-transparent text-slate-400 hover:text-amber-200 transition-all whitespace-nowrap">
                 📁 <span data-i18n="tabHistory">Historial Guardado</span>
             </button>
-            <button onclick="switchTab('raw')" id="tab-btn-raw" class="px-5 py-3 font-medium text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-all whitespace-nowrap">
+            <button onclick="switchTab('raw')" id="tab-btn-raw" class="px-5 py-3 font-medium text-sm border-b-2 border-transparent text-slate-400 hover:text-amber-200 transition-all whitespace-nowrap">
                 🛠️ <span data-i18n="tabRaw">Respuesta JSON</span>
             </button>
         </div>
@@ -81,31 +130,31 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 
                 <!-- Formulario Carta Natal -->
-                <div class="bg-slate-800/50 border border-slate-700/50 p-6 rounded-2xl shadow-xl h-fit" id="form-container">
-                    <h2 class="text-lg font-semibold text-slate-200 mb-4 flex items-center gap-2">
-                        <span>🗓️</span> <span data-i18n="birthDataTitle">Datos de Nacimiento</span>
+                <div class="mystic-card p-6 shadow-2xl h-fit" id="form-container">
+                    <h2 class="text-lg font-semibold text-amber-200 mb-4 flex items-center gap-2 border-b border-amber-500/20 pb-2">
+                        <span>☿</span> <span data-i18n="birthDataTitle">Datos de Nacimiento</span>
                     </h2>
                     <form id="chart-form" onsubmit="handleCalculate(event)" class="space-y-4">
                         <div>
-                            <label class="block text-xs font-medium text-slate-400 mb-1" data-i18n="labelName">Nombre / Identificador</label>
-                            <input type="text" id="person-name" data-i18n-placeholder="placeholderName" placeholder="Nombre o Identificador" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-purple-500 mb-2">
+                            <label class="block text-xs font-medium text-amber-300/80 mb-1" data-i18n="labelName">Nombre / Identificador</label>
+                            <input type="text" id="person-name" data-i18n-placeholder="placeholderName" placeholder="Nombre o Identificador" required class="w-full mystic-input px-3 py-2 text-sm focus:outline-none mb-2">
                             
-                            <label class="block text-xs font-medium text-slate-400 mb-1" data-i18n="labelDate">Fecha (Año, Mes, Día)</label>
+                            <label class="block text-xs font-medium text-amber-300/80 mb-1" data-i18n="labelDate">Fecha (Año, Mes, Día)</label>
                             <div class="grid grid-cols-3 gap-2">
-                                <input type="number" id="year" data-i18n-placeholder="placeholderYear" placeholder="Año" required class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-purple-500">
-                                <input type="number" id="month" data-i18n-placeholder="placeholderMonth" placeholder="Mes" min="1" max="12" required class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-purple-500">
-                                <input type="number" id="day" data-i18n-placeholder="placeholderDay" placeholder="Día" min="1" max="31" required class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-purple-500">
+                                <input type="number" id="year" data-i18n-placeholder="placeholderYear" placeholder="Año" required class="mystic-input px-3 py-2 text-sm focus:outline-none text-center">
+                                <input type="number" id="month" data-i18n-placeholder="placeholderMonth" placeholder="Mes" min="1" max="12" required class="mystic-input px-3 py-2 text-sm focus:outline-none text-center">
+                                <input type="number" id="day" data-i18n-placeholder="placeholderDay" placeholder="Día" min="1" max="31" required class="mystic-input px-3 py-2 text-sm focus:outline-none text-center">
                             </div>
                         </div>
 
                         <div class="grid grid-cols-2 gap-2">
                             <div>
-                                <label class="block text-xs font-medium text-slate-400 mb-1" data-i18n="labelTime">Hora Local (HH:MM)</label>
-                                <input type="time" id="time-local" onchange="updateUtcCalculation()" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-purple-500">
+                                <label class="block text-xs font-medium text-amber-300/80 mb-1" data-i18n="labelTime">Hora Local (HH:MM)</label>
+                                <input type="time" id="time-local" onchange="updateUtcCalculation()" required class="w-full mystic-input px-3 py-2 text-sm focus:outline-none">
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-slate-400 mb-1" data-i18n="labelTimezone">Zona Horaria (UTC)</label>
-                                <select id="utc-offset" onchange="updateUtcCalculation()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-2 text-sm text-slate-200 focus:outline-none focus:border-purple-500">
+                                <label class="block text-xs font-medium text-amber-300/80 mb-1" data-i18n="labelTimezone">Zona Horaria (UTC)</label>
+                                <select id="utc-offset" onchange="updateUtcCalculation()" class="w-full mystic-input px-2 py-2 text-sm focus:outline-none">
                                     <option value="-12">-12:00</option>
                                     <option value="-11">-11:00</option>
                                     <option value="-10">-10:00 (Hawaii)</option>
@@ -136,32 +185,32 @@
                             </div>
                         </div>
 
-                        <div class="bg-purple-950/40 p-2.5 rounded-lg border border-purple-800/50 flex justify-between items-center text-xs">
-                            <span class="text-slate-400" data-i18n="labelUtcCalculated">Hora UTC Calculada:</span>
-                            <span id="utc-calculated-display" class="font-mono text-purple-300 font-bold">--:-- UTC</span>
+                        <div class="bg-indigo-950/60 p-3 rounded-xl border border-amber-500/30 flex justify-between items-center text-xs shadow-inner">
+                            <span class="text-amber-200/80" data-i18n="labelUtcCalculated">Hora UTC Calculada:</span>
+                            <span id="utc-calculated-display" class="font-mono text-amber-300 font-bold">--:-- UTC</span>
                         </div>
 
                         <div class="relative">
-                            <label class="block text-xs font-medium text-slate-400 mb-1" data-i18n="labelCity">Ciudad / Lugar de Nacimiento</label>
+                            <label class="block text-xs font-medium text-amber-300/80 mb-1" data-i18n="labelCity">Ciudad / Lugar de Nacimiento</label>
                             <div class="flex gap-2">
-                                <input type="text" id="city-search" data-i18n-placeholder="placeholderCity" placeholder="Ej: Barinas, Venezuela" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-purple-500">
-                                <button type="button" onclick="searchLocation()" class="bg-slate-700 hover:bg-slate-600 px-3 py-2 rounded-lg text-xs font-medium transition-colors">🔍</button>
+                                <input type="text" id="city-search" data-i18n-placeholder="placeholderCity" placeholder="Ej: Barinas, Venezuela" class="w-full mystic-input px-3 py-2 text-sm focus:outline-none">
+                                <button type="button" onclick="searchLocation()" class="bg-slate-800 hover:bg-slate-700 border border-amber-500/30 px-3 py-2 rounded-xl text-xs font-medium transition-colors text-amber-200">🔍</button>
                             </div>
-                            <div id="city-results" class="hidden absolute left-0 right-0 top-full mt-1 bg-slate-900 border border-slate-700 rounded-lg shadow-2xl z-50 max-h-40 overflow-y-auto text-xs"></div>
+                            <div id="city-results" class="hidden absolute left-0 right-0 top-full mt-1 bg-slate-900 border border-amber-500/40 rounded-xl shadow-2xl z-50 max-h-40 overflow-y-auto text-xs"></div>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-2 text-xs bg-slate-950/40 p-2.5 rounded-lg border border-slate-800">
+                        <div class="grid grid-cols-2 gap-2 text-xs bg-slate-950/60 p-3 rounded-xl border border-amber-500/20">
                             <div>
-                                <span class="text-slate-500 block" data-i18n="labelLatitude">Latitud:</span>
-                                <span id="lat-val" class="font-mono text-purple-400">8.6200</span>
+                                <span class="text-amber-300/60 block" data-i18n="labelLatitude">Latitud:</span>
+                                <span id="lat-val" class="font-mono text-amber-200 font-semibold">8.6200</span>
                             </div>
                             <div>
-                                <span class="text-slate-500 block" data-i18n="labelLongitude">Longitud:</span>
-                                <span id="lon-val" class="font-mono text-purple-400">-70.2000</span>
+                                <span class="text-amber-300/60 block" data-i18n="labelLongitude">Longitud:</span>
+                                <span id="lon-val" class="font-mono text-amber-200 font-semibold">-70.2000</span>
                             </div>
                         </div>
 
-                        <button type="submit" id="btn-submit" class="w-full mt-4 bg-purple-600 hover:bg-purple-500 text-white font-medium py-2.5 rounded-lg transition-colors shadow-lg shadow-purple-600/30 flex justify-center items-center gap-2">
+                        <button type="submit" id="btn-submit" class="w-full mt-4 bg-gradient-to-r from-amber-600 to-purple-700 hover:from-amber-500 hover:to-purple-600 text-amber-100 font-medium py-3 rounded-xl transition-all shadow-lg shadow-amber-900/40 border border-amber-400/40 flex justify-center items-center gap-2">
                             <span data-i18n="btnCalculateChart">Calcular Carta Natal</span>
                         </button>
                     </form>
@@ -169,39 +218,39 @@
 
                 <!-- Resultados -->
                 <div class="lg:col-span-2 space-y-6">
-                    <div id="angles-card" class="hidden bg-slate-800/40 border border-slate-700/50 p-4 rounded-2xl grid grid-cols-2 sm:grid-cols-4 gap-4">
-                        <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
-                            <span class="text-[10px] uppercase font-bold text-slate-400 block" data-i18n="angleAsc">Ascendente (AC)</span>
-                            <span id="ang-asc" class="text-sm font-semibold text-purple-300">-</span>
+                    <div id="angles-card" class="hidden mystic-card p-4 grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        <div class="bg-slate-950/60 p-3 rounded-xl border border-amber-500/20">
+                            <span class="text-[10px] uppercase font-bold text-amber-300/70 block" data-i18n="angleAsc">Ascendente (AC)</span>
+                            <span id="ang-asc" class="text-sm font-semibold text-amber-200">-</span>
                         </div>
-                        <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
-                            <span class="text-[10px] uppercase font-bold text-slate-400 block" data-i18n="angleMc">Medio Cielo (MC)</span>
+                        <div class="bg-slate-950/60 p-3 rounded-xl border border-amber-500/20">
+                            <span class="text-[10px] uppercase font-bold text-amber-300/70 block" data-i18n="angleMc">Medio Cielo (MC)</span>
                             <span id="ang-mc" class="text-sm font-semibold text-pink-300">-</span>
                         </div>
-                        <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
-                            <span class="text-[10px] uppercase font-bold text-slate-400 block" data-i18n="angleDc">Descendente (DC)</span>
+                        <div class="bg-slate-950/60 p-3 rounded-xl border border-amber-500/20">
+                            <span class="text-[10px] uppercase font-bold text-amber-300/70 block" data-i18n="angleDc">Descendente (DC)</span>
                             <span id="ang-dc" class="text-sm font-semibold text-slate-300">-</span>
                         </div>
-                        <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
-                            <span class="text-[10px] uppercase font-bold text-slate-400 block" data-i18n="angleIc">Fondo Cielo (IC)</span>
+                        <div class="bg-slate-950/60 p-3 rounded-xl border border-amber-500/20">
+                            <span class="text-[10px] uppercase font-bold text-amber-300/70 block" data-i18n="angleIc">Fondo Cielo (IC)</span>
                             <span id="ang-ic" class="text-sm font-semibold text-slate-300">-</span>
                         </div>
                     </div>
 
-                    <div class="bg-slate-800/50 border border-slate-700/50 p-4 rounded-2xl shadow-xl flex flex-col items-center">
-                        <h3 class="font-semibold text-slate-200 self-start mb-2">🔮 <span data-i18n="wheelTitle">Rueda Astrológica</span></h3>
+                    <div class="mystic-card p-6 shadow-2xl flex flex-col items-center">
+                        <h3 class="font-semibold text-amber-200 self-start mb-4 flex items-center gap-2 border-b border-amber-500/20 pb-2 w-full">🔮 <span data-i18n="wheelTitle">Rueda Astrológica</span></h3>
                         <div id="chart-wheel-container" class="w-full max-w-[500px] aspect-square flex items-center justify-center">
-                            <div class="text-slate-500 text-xs text-center p-6" data-i18n="wheelPlaceholder">Completa los datos y haz clic en "Calcular Carta Natal"</div>
+                            <div class="text-amber-300/60 text-xs text-center p-6" data-i18n="wheelPlaceholder">Completa los datos y haz clic en "Calcular Carta Natal"</div>
                         </div>
                     </div>
 
-                    <div class="bg-slate-800/50 border border-slate-700/50 rounded-2xl overflow-hidden shadow-xl">
-                        <div class="px-6 py-4 border-b border-slate-700/50">
-                            <h3 class="font-semibold text-slate-200">🪐 <span data-i18n="planetsTitle">Posiciones Planetarias</span></h3>
+                    <div class="mystic-card overflow-hidden shadow-2xl">
+                        <div class="px-6 py-4 border-b border-amber-500/20">
+                            <h3 class="font-semibold text-amber-200">🪐 <span data-i18n="planetsTitle">Posiciones Planetarias</span></h3>
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-sm text-slate-300">
-                                <thead class="bg-slate-900/50 text-slate-400 uppercase text-[10px] tracking-wider">
+                                <thead class="bg-slate-950/80 text-amber-300/80 uppercase text-[10px] tracking-wider border-b border-amber-500/20">
                                     <tr>
                                         <th class="px-6 py-3" data-i18n="thPlanet">Planeta</th>
                                         <th class="px-6 py-3" data-i18n="thSign">Signo</th>
@@ -209,9 +258,9 @@
                                         <th class="px-6 py-3" data-i18n="thStatus">Estado</th>
                                     </tr>
                                 </thead>
-                                <tbody id="planets-table-body" class="divide-y divide-slate-700/30">
+                                <tbody id="planets-table-body" class="divide-y divide-amber-500/10">
                                     <tr>
-                                        <td colspan="4" class="px-6 py-8 text-center text-slate-500" data-i18n="noDataLoaded">Sin datos cargados.</td>
+                                        <td colspan="4" class="px-6 py-8 text-center text-amber-300/50" data-i18n="noDataLoaded">Sin datos cargados.</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -223,44 +272,44 @@
 
         <!-- TAB 2: SINASTRÍA DE PAREJA -->
         <div id="tab-synastry" class="tab-content">
-            <div id="synastry-export-container" class="bg-slate-800/50 border border-slate-700/50 p-6 rounded-2xl shadow-xl space-y-6">
-                <h2 class="text-lg font-semibold text-slate-200 flex items-center gap-2">
+            <div id="synastry-export-container" class="mystic-card p-6 shadow-2xl space-y-6">
+                <h2 class="text-lg font-semibold text-amber-200 flex items-center gap-2 border-b border-amber-500/20 pb-2">
                     <span>💞</span> <span data-i18n="synastryMainTitle">Comparativa de Sinastría Avanzada</span>
                 </h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="synastry-forms-group">
                     <!-- Persona A -->
-                    <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800 space-y-3">
-                        <h3 class="text-purple-400 font-bold text-sm" data-i18n="personA">Persona A</h3>
-                        <input type="text" id="syn-a-name" data-i18n-placeholder="placeholderPersonA" placeholder="Nombre o Persona A" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-xs text-slate-200 focus:outline-none focus:border-purple-500">
+                    <div class="bg-slate-950/70 p-4 rounded-xl border border-amber-500/20 space-y-3">
+                        <h3 class="text-amber-300 font-bold text-sm" data-i18n="personA">Persona A</h3>
+                        <input type="text" id="syn-a-name" data-i18n-placeholder="placeholderPersonA" placeholder="Nombre o Persona A" class="w-full mystic-input p-2 text-xs focus:outline-none">
                         <div class="grid grid-cols-3 gap-2 text-xs">
-                            <input type="number" id="syn-a-year" data-i18n-placeholder="placeholderYear" placeholder="Año" class="bg-slate-800 border border-slate-700 p-2 rounded focus:outline-none focus:border-purple-500">
-                            <input type="number" id="syn-a-month" data-i18n-placeholder="placeholderMonth" placeholder="Mes" min="1" max="12" class="bg-slate-800 border border-slate-700 p-2 rounded focus:outline-none focus:border-purple-500">
-                            <input type="number" id="syn-a-day" data-i18n-placeholder="placeholderDay" placeholder="Día" min="1" max="31" class="bg-slate-800 border border-slate-700 p-2 rounded focus:outline-none focus:border-purple-500">
+                            <input type="number" id="syn-a-year" data-i18n-placeholder="placeholderYear" placeholder="Año" class="mystic-input p-2 rounded text-center focus:outline-none">
+                            <input type="number" id="syn-a-month" data-i18n-placeholder="placeholderMonth" placeholder="Mes" min="1" max="12" class="mystic-input p-2 rounded text-center focus:outline-none">
+                            <input type="number" id="syn-a-day" data-i18n-placeholder="placeholderDay" placeholder="Día" min="1" max="31" class="mystic-input p-2 rounded text-center focus:outline-none">
                         </div>
-                        <input type="time" id="syn-a-time" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-xs text-slate-200 focus:outline-none focus:border-purple-500">
+                        <input type="time" id="syn-a-time" class="w-full mystic-input p-2 text-xs focus:outline-none">
                     </div>
 
                     <!-- Persona B -->
-                    <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800 space-y-3">
-                        <h3 class="text-pink-400 font-bold text-sm" data-i18n="personB">Persona B</h3>
-                        <input type="text" id="syn-b-name" data-i18n-placeholder="placeholderPersonB" placeholder="Nombre o Persona B" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-xs text-slate-200 focus:outline-none focus:border-pink-500">
+                    <div class="bg-slate-950/70 p-4 rounded-xl border border-amber-500/20 space-y-3">
+                        <h3 class="text-pink-300 font-bold text-sm" data-i18n="personB">Persona B</h3>
+                        <input type="text" id="syn-b-name" data-i18n-placeholder="placeholderPersonB" placeholder="Nombre o Persona B" class="w-full mystic-input p-2 text-xs focus:outline-none">
                         <div class="grid grid-cols-3 gap-2 text-xs">
-                            <input type="number" id="syn-b-year" data-i18n-placeholder="placeholderYear" placeholder="Año" class="bg-slate-800 border border-slate-700 p-2 rounded focus:outline-none focus:border-pink-500">
-                            <input type="number" id="syn-b-month" data-i18n-placeholder="placeholderMonth" placeholder="Mes" min="1" max="12" class="bg-slate-800 border border-slate-700 p-2 rounded focus:outline-none focus:border-pink-500">
-                            <input type="number" id="syn-b-day" data-i18n-placeholder="placeholderDay" placeholder="Día" min="1" max="31" class="bg-slate-800 border border-slate-700 p-2 rounded focus:outline-none focus:border-pink-500">
+                            <input type="number" id="syn-b-year" data-i18n-placeholder="placeholderYear" placeholder="Año" class="mystic-input p-2 rounded text-center focus:outline-none">
+                            <input type="number" id="syn-b-month" data-i18n-placeholder="placeholderMonth" placeholder="Mes" min="1" max="12" class="mystic-input p-2 rounded text-center focus:outline-none">
+                            <input type="number" id="syn-b-day" data-i18n-placeholder="placeholderDay" placeholder="Día" min="1" max="31" class="mystic-input p-2 rounded text-center focus:outline-none">
                         </div>
-                        <input type="time" id="syn-b-time" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-xs text-slate-200 focus:outline-none focus:border-pink-500">
+                        <input type="time" id="syn-b-time" class="w-full mystic-input p-2 text-xs focus:outline-none">
                     </div>
                 </div>
 
-                <button onclick="handleCalculateSynastry()" id="btn-synastry-submit" class="w-full bg-pink-600 hover:bg-pink-500 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition duration-200 cursor-pointer" data-i18n="btnCalculateSynastry">
+                <button onclick="handleCalculateSynastry()" id="btn-synastry-submit" class="w-full bg-gradient-to-r from-pink-700 to-amber-700 hover:from-pink-600 hover:to-amber-600 text-amber-100 font-bold py-3 px-4 rounded-xl shadow-lg transition duration-200 cursor-pointer border border-amber-400/30" data-i18n="btnCalculateSynastry">
                     Calcular Compatibilidad de Pareja
                 </button>
 
-                <div id="synastry-result" class="hidden bg-slate-900/80 p-6 rounded-xl border border-slate-800 space-y-6 mt-6"></div>
+                <div id="synastry-result" class="hidden bg-slate-950/90 p-6 rounded-xl border border-amber-500/30 space-y-6 mt-6"></div>
 
-                <div id="synastry-wheel-card" class="hidden bg-slate-800/50 border border-slate-700/50 p-6 rounded-2xl shadow-xl flex flex-col items-center mt-6">
-                    <h3 class="font-semibold text-slate-200 self-start mb-2">💞 <span data-i18n="synastryWheelTitle">Rueda de Sinastría (Doble Anillo)</span></h3>
+                <div id="synastry-wheel-card" class="hidden mystic-card p-6 shadow-2xl flex flex-col items-center mt-6">
+                    <h3 class="font-semibold text-amber-200 self-start mb-2">💞 <span data-i18n="synastryWheelTitle">Rueda de Sinastría (Doble Anillo)</span></h3>
                     <div id="synastry-wheel-container" class="w-full max-w-[500px] aspect-square flex items-center justify-center"></div>
                 </div>
             </div>
@@ -268,52 +317,52 @@
 
         <!-- TAB 3: TRÁNSITOS ACTUALES -->
         <div id="tab-transits" class="tab-content">
-            <div class="bg-slate-800/50 border border-slate-700/50 p-6 rounded-2xl shadow-xl space-y-6">
-                <div class="flex justify-between items-center flex-wrap gap-4">
+            <div class="mystic-card p-6 shadow-2xl space-y-6">
+                <div class="flex justify-between items-center flex-wrap gap-4 border-b border-amber-500/20 pb-4">
                     <div>
-                        <h2 class="text-lg font-semibold text-slate-200 flex items-center gap-2">
+                        <h2 class="text-lg font-semibold text-amber-200 flex items-center gap-2">
                             <span>🌟</span> <span data-i18n="transitsMainTitle">Clima Astrológico y Tránsitos de Hoy</span>
                         </h2>
-                        <p class="text-xs text-slate-400" data-i18n="transitsSubtitle">Analiza el movimiento del cielo actual y su impacto en tu carta natal.</p>
+                        <p class="text-xs text-amber-300/70" data-i18n="transitsSubtitle">Analiza el movimiento del cielo actual y su impacto en tu carta natal.</p>
                     </div>
-                    <button onclick="calculateTransits()" id="btn-transits" class="bg-purple-600 hover:bg-purple-500 text-white font-medium px-5 py-2.5 rounded-xl text-xs transition-colors shadow-lg shadow-purple-600/30 cursor-pointer" data-i18n="btnCalculateTransits">
+                    <button onclick="calculateTransits()" id="btn-transits" class="bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold px-5 py-2.5 rounded-xl text-xs transition-colors shadow-lg cursor-pointer border border-amber-300" data-i18n="btnCalculateTransits">
                         🔄 Calcular Tránsitos de Hoy
                     </button>
                 </div>
 
                 <div id="transits-result" class="hidden space-y-6">
-                    <div class="bg-slate-900/80 p-5 rounded-xl border border-slate-800 flex justify-between items-center flex-wrap gap-3">
+                    <div class="bg-slate-950/80 p-5 rounded-xl border border-amber-500/30 flex justify-between items-center flex-wrap gap-3">
                         <div>
-                            <span class="text-[10px] uppercase font-bold text-slate-400 block" data-i18n="transitDateLabel">Fecha del Clima Actual</span>
-                            <span id="transit-date-display" class="text-sm font-bold text-purple-300">--</span>
+                            <span class="text-[10px] uppercase font-bold text-amber-300/70 block" data-i18n="transitDateLabel">Fecha del Clima Actual</span>
+                            <span id="transit-date-display" class="text-sm font-bold text-amber-200">--</span>
                         </div>
-                        <div class="text-xs bg-purple-950/60 text-purple-300 border border-purple-800 px-3 py-1.5 rounded-lg" data-i18n="transitBadge">
+                        <div class="text-xs bg-amber-950/60 text-amber-300 border border-amber-700/50 px-3 py-1.5 rounded-lg" data-i18n="transitBadge">
                             ✨ Ciclo Energético Activo
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-slate-900/60 p-5 rounded-xl border border-slate-800 space-y-3">
-                            <h3 class="font-bold text-slate-200 text-sm flex items-center gap-2">
+                        <div class="bg-slate-950/70 p-5 rounded-xl border border-amber-500/20 space-y-3">
+                            <h3 class="font-bold text-amber-200 text-sm flex items-center gap-2">
                                 <span>🪐</span> <span data-i18n="transitPlanetsTitle">Planetas en Tránsito (Cielo de Hoy)</span>
                             </h3>
                             <div id="transit-planets-list" class="space-y-2 text-xs">
-                                <span class="text-slate-500" data-i18n="calculatingText">Calculando posiciones actuales...</span>
+                                <span class="text-amber-300/50" data-i18n="calculatingText">Calculando posiciones actuales...</span>
                             </div>
                         </div>
 
-                        <div class="bg-slate-900/60 p-5 rounded-xl border border-slate-800 space-y-3">
-                            <h3 class="font-bold text-slate-200 text-sm flex items-center gap-2">
+                        <div class="bg-slate-950/70 p-5 rounded-xl border border-amber-500/20 space-y-3">
+                            <h3 class="font-bold text-amber-200 text-sm flex items-center gap-2">
                                 <span>⚡</span> <span data-i18n="transitEnergyTitle">Influencia Energética y Recomendaciones</span>
                             </h3>
                             <div id="transit-interpretations" class="space-y-3 text-xs text-slate-300">
-                                <p class="text-slate-500" data-i18n="transitInterpPlaceholder">Haz clic en calcular para ver cómo influyen los tránsitos de hoy en tus áreas de vida.</p>
+                                <p class="text-amber-300/50" data-i18n="transitInterpPlaceholder">Haz clic en calcular para ver cómo influyen los tránsitos de hoy en tus áreas de vida.</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div id="transits-placeholder" class="text-center py-12 text-slate-500 text-xs" data-i18n="transitsPlaceholderMain">
+                <div id="transits-placeholder" class="text-center py-12 text-amber-300/50 text-xs" data-i18n="transitsPlaceholderMain">
                     Haz clic en el botón superior para calcular el clima astrológico de hoy en base a tu carta guardada o predeterminada.
                 </div>
             </div>
@@ -321,29 +370,29 @@
 
         <!-- TAB 4: HISTORIAL GUARDADO -->
         <div id="tab-history" class="tab-content">
-            <div class="bg-slate-800/50 border border-slate-700/50 p-6 rounded-2xl shadow-xl space-y-4">
-                <div class="flex justify-between items-center">
-                    <h2 class="text-lg font-semibold text-slate-200" data-i18n="historyMainTitle">📁 Registros Astrológicos Guardados</h2>
-                    <button onclick="clearHistory()" class="text-xs bg-rose-950/60 hover:bg-rose-900 text-rose-300 border border-rose-800 px-3 py-1.5 rounded-lg transition-colors cursor-pointer" data-i18n="btnClearHistory">
+            <div class="mystic-card p-6 shadow-2xl space-y-4">
+                <div class="flex justify-between items-center border-b border-amber-500/20 pb-3">
+                    <h2 class="text-lg font-semibold text-amber-200" data-i18n="historyMainTitle">📁 Registros Astrológicos Guardados</h2>
+                    <button onclick="clearHistory()" class="text-xs bg-rose-950/60 hover:bg-rose-900 text-rose-300 border border-rose-800/80 px-3 py-1.5 rounded-xl transition-colors cursor-pointer" data-i18n="btnClearHistory">
                         🗑️ Borrar Historial
                     </button>
                 </div>
                 <div id="history-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div class="text-slate-500 text-xs py-8 col-span-full text-center" data-i18n="noHistoryText">No hay cartas guardadas aún en el historial.</div>
+                    <div class="text-amber-300/50 text-xs py-8 col-span-full text-center" data-i18n="noHistoryText">No hay cartas guardadas aún en el historial.</div>
                 </div>
             </div>
         </div>
 
         <!-- TAB 5: RAW JSON -->
         <div id="tab-raw" class="tab-content">
-            <div class="bg-slate-800/50 border border-slate-700/50 p-6 rounded-2xl shadow-xl">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-lg font-semibold text-slate-200" data-i18n="rawJsonTitle">JSON Devuelto por la API</h2>
-                    <button onclick="copyJson()" class="text-xs bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded text-slate-200 transition-colors cursor-pointer" data-i18n="btnCopyJson">
+            <div class="mystic-card p-6 shadow-2xl">
+                <div class="flex justify-between items-center mb-4 border-b border-amber-500/20 pb-3">
+                    <h2 class="text-lg font-semibold text-amber-200" data-i18n="rawJsonTitle">JSON Devuelto por la API</h2>
+                    <button onclick="copyJson()" class="text-xs bg-slate-800 hover:bg-slate-700 border border-amber-500/30 px-3 py-1.5 rounded-xl text-amber-200 transition-colors cursor-pointer" data-i18n="btnCopyJson">
                         📋 Copiar JSON
                     </button>
                 </div>
-                <pre id="json-output" class="bg-slate-950 p-4 rounded-xl font-mono text-xs text-green-400 overflow-x-auto border border-slate-800 max-h-[500px]">
+                <pre id="json-output" class="bg-slate-950 p-4 rounded-xl font-mono text-xs text-amber-300 overflow-x-auto border border-amber-500/30 max-h-[500px]">
 // Los datos JSON aparecerán aquí tras realizar el cálculo...
                 </pre>
             </div>
@@ -665,7 +714,7 @@
         function checkApiStatus() {
             const badge = document.getElementById('status-badge');
             if (badge) {
-                badge.className = "flex items-center space-x-2 text-xs px-3 py-1 rounded-full bg-emerald-950/50 text-emerald-400 border border-emerald-800";
+                badge.className = "flex items-center space-x-2 text-xs px-3.5 py-1.5 rounded-xl bg-emerald-950/60 text-emerald-300 border border-emerald-600/40 shadow-inner";
                 const currentLang = document.getElementById('langSwitch').value;
                 let apiText = (currentLang === 'en') ? "API Connected" : (currentLang === 'it') ? "API Connessa" : (currentLang === 'fr') ? "API Connectée" : (currentLang === 'pt') ? "API Conectada" : "API Conectada";
                 badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span><span>${apiText}</span>`;
@@ -681,8 +730,8 @@
             ['chart', 'synastry', 'transits', 'history', 'raw'].forEach(b => {
                 const btn = document.getElementById(`tab-btn-${b}`);
                 if (btn) btn.className = (b === tab) 
-                    ? "px-5 py-3 font-medium text-sm border-b-2 border-purple-500 text-purple-400 transition-all whitespace-nowrap" 
-                    : "px-5 py-3 font-medium text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-all whitespace-nowrap";
+                    ? "px-5 py-3 font-medium text-sm border-b-2 border-amber-400 text-amber-200 transition-all whitespace-nowrap bg-amber-500/10 rounded-t-xl" 
+                    : "px-5 py-3 font-medium text-sm border-b-2 border-transparent text-slate-400 hover:text-amber-200 transition-all whitespace-nowrap";
             });
 
             const actionBtns = document.getElementById('action-buttons');
@@ -716,7 +765,7 @@
             const resultsDiv = document.getElementById('city-results');
             if (!query) return;
 
-            resultsDiv.innerHTML = '<div class="p-2 text-slate-400">Buscando...</div>';
+            resultsDiv.innerHTML = '<div class="p-2 text-amber-200/70">Buscando...</div>';
             resultsDiv.classList.remove('hidden');
 
             try {
@@ -724,13 +773,13 @@
                 const data = await res.json();
                 resultsDiv.innerHTML = '';
                 if (data.length === 0) {
-                    resultsDiv.innerHTML = '<div class="p-2 text-slate-400">No se encontraron lugares.</div>';
+                    resultsDiv.innerHTML = '<div class="p-2 text-amber-200/70">No se encontraron lugares.</div>';
                     return;
                 }
                 data.forEach(item => {
                     const btn = document.createElement('button');
                     btn.type = 'button';
-                    btn.className = "w-full text-left p-2 hover:bg-purple-900/50 text-slate-200 transition-colors border-b border-slate-800 last:border-0";
+                    btn.className = "w-full text-left p-2 hover:bg-amber-900/40 text-amber-100 transition-colors border-b border-amber-500/20 last:border-0";
                     btn.textContent = item.display_name;
                     btn.onclick = () => {
                         currentLat = parseFloat(item.lat);
@@ -743,7 +792,7 @@
                     resultsDiv.appendChild(btn);
                 });
             } catch (e) {
-                resultsDiv.innerHTML = '<div class="p-2 text-red-400">Error al buscar ubicación.</div>';
+                resultsDiv.innerHTML = '<div class="p-2 text-rose-300">Error al buscar ubicación.</div>';
             }
         }
 
@@ -821,10 +870,10 @@
                 planetsList.innerHTML = '';
                 transitData.planets.forEach(p => {
                     const div = document.createElement('div');
-                    div.className = "flex justify-between items-center bg-slate-950 p-2.5 rounded border border-slate-800";
+                    div.className = "flex justify-between items-center bg-slate-950 p-2.5 rounded border border-amber-500/20";
                     div.innerHTML = `
-                        <span class="font-medium text-slate-200 flex items-center gap-1.5"><span>${getPlanetIcon(p.name)}</span> ${p.name}</span>
-                        <span class="text-purple-300 font-mono">${p.sign} ${p.sign_deg.toFixed(1)}° ${p.is_retrograde ? '(Rx)' : ''}</span>
+                        <span class="font-medium text-amber-200 flex items-center gap-1.5"><span>${getPlanetIcon(p.name)}</span> ${p.name}</span>
+                        <span class="text-amber-300 font-mono">${p.sign} ${p.sign_deg.toFixed(1)}° ${p.is_retrograde ? '(Rx)' : ''}</span>
                     `;
                     planetsList.appendChild(div);
                 });
@@ -884,9 +933,9 @@
                 const container = document.getElementById('synastry-result');
                 container.classList.add('hidden');
                 container.innerHTML = `
-                    <div class="flex items-center justify-between border-b border-slate-800 pb-3 flex-wrap gap-2">
-                        <h4 class="font-bold text-pink-400 text-lg">Resultado de Sinastría: ${nameA} & ${nameB}</h4>
-                        <span class="text-xs bg-pink-950/80 text-pink-300 border border-pink-800 px-3 py-1 rounded-full font-mono font-bold">✨ Compatibilidad Calculada</span>
+                    <div class="flex items-center justify-between border-b border-amber-500/30 pb-3 flex-wrap gap-2">
+                        <h4 class="font-bold text-amber-200 text-lg">Resultado de Sinastría: ${nameA} & ${nameB}</h4>
+                        <span class="text-xs bg-amber-950/80 text-amber-300 border border-amber-600 px-3 py-1 rounded-full font-mono font-bold">✨ Compatibilidad Calculada</span>
                     </div>
                 `;
 
@@ -915,12 +964,12 @@
             const innerRadius = 105;
 
             const zodiacSymbols = ["♈", "♉", "♊", "♋", "♌", "♍", "♎", "♏", "♐", "♑", "♒", "♓"];
-            const elementColors = ["#ef4444", "#10b981", "#3b82f6", "#f59e0b"];
+            const elementColors = ["#f87171", "#34d399", "#60a5fa", "#fbbf24"];
 
             let svg = `<svg viewBox="0 0 ${size} ${size}" class="w-full h-full">`;
-            svg += `<circle cx="${center}" cy="${center}" r="${radius}" fill="none" stroke="#475569" stroke-width="2"/>`;
-            svg += `<circle cx="${center}" cy="${center}" r="${midRadius}" fill="none" stroke="#334155" stroke-width="1.5"/>`;
-            svg += `<circle cx="${center}" cy="${center}" r="${innerRadius}" fill="#0f172a" stroke="#334155" stroke-width="2"/>`;
+            svg += `<circle cx="${center}" cy="${center}" r="${radius}" fill="none" stroke="#d4af37" stroke-opacity="0.4" stroke-width="2"/>`;
+            svg += `<circle cx="${center}" cy="${center}" r="${midRadius}" fill="none" stroke="#d4af37" stroke-opacity="0.2" stroke-width="1.5"/>`;
+            svg += `<circle cx="${center}" cy="${center}" r="${innerRadius}" fill="#0b0f19" stroke="#d4af37" stroke-opacity="0.4" stroke-width="2"/>`;
 
             function getCoords(deg, r) {
                 const rad = (180 - (deg - ascDeg)) * (Math.PI / 180);
@@ -931,7 +980,7 @@
                 const startDeg = i * 30;
                 const p1 = getCoords(startDeg, radius);
                 const p2 = getCoords(startDeg, midRadius);
-                svg += `<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="#334155" stroke-width="1.5"/>`;
+                svg += `<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="#d4af37" stroke-opacity="0.3" stroke-width="1.5"/>`;
 
                 const midCoords = getCoords(startDeg + 15, (radius + midRadius) / 2);
                 svg += `<text x="${midCoords.x}" y="${midCoords.y}" fill="${elementColors[i % 4]}" font-size="14" font-weight="bold" text-anchor="middle" dominant-baseline="central">${zodiacSymbols[i]}</text>`;
@@ -940,15 +989,15 @@
             if (chartA.planets) {
                 chartA.planets.forEach(p => {
                     const pt = getCoords(p.abs_deg, innerRadius + 25);
-                    svg += `<circle cx="${pt.x}" cy="${pt.y}" r="9" fill="#1e293b" stroke="#a855f7" stroke-width="1"/>`;
-                    svg += `<text x="${pt.x}" y="${pt.y}" fill="#c084fc" font-size="10" text-anchor="middle" dominant-baseline="central">${getPlanetIcon(p.name)}</text>`;
+                    svg += `<circle cx="${pt.x}" cy="${pt.y}" r="9" fill="#121624" stroke="#d4af37" stroke-width="1"/>`;
+                    svg += `<text x="${pt.x}" y="${pt.y}" fill="#fef08a" font-size="10" text-anchor="middle" dominant-baseline="central">${getPlanetIcon(p.name)}</text>`;
                 });
             }
 
             if (chartB.planets) {
                 chartB.planets.forEach(p => {
                     const pt = getCoords(p.abs_deg, midRadius + 25);
-                    svg += `<circle cx="${pt.x}" cy="${pt.y}" r="9" fill="#1e293b" stroke="#ec4899" stroke-width="1"/>`;
+                    svg += `<circle cx="${pt.x}" cy="${pt.y}" r="9" fill="#121624" stroke="#f472b6" stroke-width="1"/>`;
                     svg += `<text x="${pt.x}" y="${pt.y}" fill="#f472b6" font-size="10" text-anchor="middle" dominant-baseline="central">${getPlanetIcon(p.name)}</text>`;
                 });
             }
@@ -968,7 +1017,7 @@
             const container = document.getElementById('history-list');
             let history = JSON.parse(localStorage.getItem('astrology_history') || '[]');
             if (history.length === 0) {
-                container.innerHTML = `<div class="text-slate-500 text-xs py-8 col-span-full text-center">No hay cartas guardadas aún en el historial.</div>`;
+                container.innerHTML = `<div class="text-amber-300/50 text-xs py-8 col-span-full text-center">No hay cartas guardadas aún en el historial.</div>`;
                 return;
             }
 
@@ -977,16 +1026,16 @@
                 const sun = item.resultData.planets.find(p => p.name === 'Sun');
                 const asc = item.resultData.angles ? item.resultData.angles.Ascendant : null;
                 const card = document.createElement('div');
-                card.className = "bg-slate-900/80 border border-slate-700/60 p-4 rounded-xl flex flex-col justify-between space-y-3";
+                card.className = "bg-slate-950/80 border border-amber-500/30 p-4 rounded-xl flex flex-col justify-between space-y-3 shadow";
                 card.innerHTML = `
                     <div>
                         <div class="flex justify-between items-center mb-1">
-                            <h4 class="font-bold text-slate-200 text-sm">${item.name}</h4>
-                            <span class="text-[10px] text-slate-500">${item.date}</span>
+                            <h4 class="font-bold text-amber-200 text-sm">${item.name}</h4>
+                            <span class="text-[10px] text-amber-300/50">${item.date}</span>
                         </div>
-                        <div class="text-xs text-purple-300">☀️ ${sun ? sun.sign : '-'} | 🌅 Asc: ${asc ? asc.sign : '-'}</div>
+                        <div class="text-xs text-amber-300/80">☀️ ${sun ? sun.sign : '-'} | 🌅 Asc: ${asc ? asc.sign : '-'}</div>
                     </div>
-                    <button onclick="loadFromHistory(${item.id})" class="w-full text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 py-1.5 rounded transition-colors border border-slate-700 cursor-pointer">
+                    <button onclick="loadFromHistory(${item.id})" class="w-full text-xs bg-slate-900 hover:bg-slate-800 text-amber-200 py-1.5 rounded-lg transition-colors border border-amber-500/30 cursor-pointer">
                         🔄 Cargar Datos
                     </button>
                 `;
@@ -1030,12 +1079,12 @@
             pBody.innerHTML = '';
             data.planets.forEach(p => {
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-800/30 transition-colors";
+                tr.className = "hover:bg-amber-500/5 transition-colors";
                 tr.innerHTML = `
-                    <td class="px-6 py-3 font-medium text-slate-200 flex items-center gap-2"><span>${getPlanetIcon(p.name)}</span><span>${p.name}</span></td>
-                    <td class="px-6 py-3 text-purple-300 font-medium">${p.sign}</td>
+                    <td class="px-6 py-3 font-medium text-amber-100 flex items-center gap-2"><span>${getPlanetIcon(p.name)}</span><span>${p.name}</span></td>
+                    <td class="px-6 py-3 text-amber-300 font-medium">${p.sign}</td>
                     <td class="px-6 py-3 font-mono text-slate-300">${p.sign_deg.toFixed(2)}°</td>
-                    <td class="px-6 py-3">${p.is_retrograde ? '<span class="text-xs bg-red-950/60 text-red-400 border border-red-800 px-2 py-0.5 rounded">Rx</span>' : '<span class="text-xs text-slate-500">Directo</span>'}</td>
+                    <td class="px-6 py-3">${p.is_retrograde ? '<span class="text-xs bg-rose-950/80 text-rose-300 border border-rose-800 px-2 py-0.5 rounded">Rx</span>' : '<span class="text-xs text-amber-300/50">Directo</span>'}</td>
                 `;
                 pBody.appendChild(tr);
             });
@@ -1050,11 +1099,11 @@
             const innerRadius = 140;
 
             const zodiacSymbols = ["♈", "♉", "♊", "♋", "♌", "♍", "♎", "♏", "♐", "♑", "♒", "♓"];
-            const elementColors = ["#ef4444", "#10b981", "#3b82f6", "#f59e0b"];
+            const elementColors = ["#f87171", "#34d399", "#60a5fa", "#fbbf24"];
 
             let svg = `<svg viewBox="0 0 ${size} ${size}" class="w-full h-full">`;
-            svg += `<circle cx="${center}" cy="${center}" r="${radius}" fill="none" stroke="#475569" stroke-width="2"/>`;
-            svg += `<circle cx="${center}" cy="${center}" r="${innerRadius}" fill="#0f172a" stroke="#334155" stroke-width="2"/>`;
+            svg += `<circle cx="${center}" cy="${center}" r="${radius}" fill="none" stroke="#d4af37" stroke-opacity="0.4" stroke-width="2"/>`;
+            svg += `<circle cx="${center}" cy="${center}" r="${innerRadius}" fill="#0b0f19" stroke="#d4af37" stroke-opacity="0.4" stroke-width="2"/>`;
 
             function getCoords(deg, r) {
                 const rad = (180 - (deg - ascDeg)) * (Math.PI / 180);
@@ -1065,7 +1114,7 @@
                 const startDeg = i * 30;
                 const p1 = getCoords(startDeg, radius);
                 const p2 = getCoords(startDeg, innerRadius);
-                svg += `<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="#334155" stroke-width="1.5"/>`;
+                svg += `<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="#d4af37" stroke-opacity="0.3" stroke-width="1.5"/>`;
 
                 const midCoords = getCoords(startDeg + 15, (radius + innerRadius) / 2);
                 svg += `<text x="${midCoords.x}" y="${midCoords.y}" fill="${elementColors[i % 4]}" font-size="16" font-weight="bold" text-anchor="middle" dominant-baseline="central">${zodiacSymbols[i]}</text>`;
@@ -1074,8 +1123,8 @@
             if (data.planets) {
                 data.planets.forEach(p => {
                     const pt = getCoords(p.abs_deg, innerRadius - 18);
-                    svg += `<circle cx="${pt.x}" cy="${pt.y}" r="11" fill="#1e293b" stroke="#818cf8" stroke-width="1"/>`;
-                    svg += `<text x="${pt.x}" y="${pt.y}" font-size="11" fill="#f8fafc" text-anchor="middle" dominant-baseline="central">${getPlanetIcon(p.name)}</text>`;
+                    svg += `<circle cx="${pt.x}" cy="${pt.y}" r="11" fill="#121624" stroke="#d4af37" stroke-width="1"/>`;
+                    svg += `<text x="${pt.x}" y="${pt.y}" font-size="11" fill="#fef08a" text-anchor="middle" dominant-baseline="central">${getPlanetIcon(p.name)}</text>`;
                 });
             }
 
@@ -1108,7 +1157,7 @@
                 html2canvas: { scale: 2, useCORS: true, logging: false },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
-            html2pdf().from(element).set(opt).save().then(() => {
+            html2pdf().from(element).res(opt).save().then(() => {
                 element.classList.remove('pdf-export-mode');
             }).catch(() => {
                 element.classList.remove('pdf-export-mode');
