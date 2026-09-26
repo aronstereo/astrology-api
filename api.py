@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from typing import List, Optional
-import google.generativeai as genai
+from google import genai
 from dotenv import load_dotenv
 
 from engine import ephemeris
@@ -15,13 +15,14 @@ from engine import ephemeris
 load_dotenv()
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-if GEMINI_API_KEY:
-    genai.configure(api_key=GEMINI_API_KEY)
+
+# Inicialización del cliente con el nuevo SDK de Google GenAI
+client = genai.Client(api_key=GEMINI_API_KEY) if GEMINI_API_KEY else genai.Client()
 
 app = FastAPI(
     title="Astrology Engine API",
     description="API para el cálculo de cartas natales, sinastría e interpretaciones profundas con IA y Caché",
-    version="1.5.0"
+    version="1.6.0"
 )
 
 app.add_middleware(
@@ -191,7 +192,7 @@ def get_deep_interpretation(req: InterpretationRequest):
                 "texto": row[0]
             }
 
-        # 3. Fallback: Llamada a Google Gemini si no está en caché
+        # 3. Fallback: Llamada a Google Gemini utilizando el nuevo SDK `google-genai`
         prompt_sistema = (
             "Eres un astrólogo profesional experto en astrología psicológica y transpersonal. "
             "Genera una interpretación profunda, empática y reveladora dividida claramente en cuatro partes: "
@@ -203,12 +204,14 @@ def get_deep_interpretation(req: InterpretationRequest):
             f"ubicado en la Casa {req.house}. Firma de aspectos clave: {aspect_signature}."
         )
 
-        model = genai.GenerativeModel(
-            model_name="models/gemini-3.6-flash",
-            system_instruction=prompt_sistema
+        # Utilizando la clase y método moderno del SDK unificado de GenAI
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt_usuario,
+            config={
+                "system_instruction": prompt_sistema,
+            }
         )
-        
-        response = model.generate_content(prompt_usuario)
         texto_ia = response.text
 
         # 4. Guardar en SQLite para futuras consultas (Caché persistente)
