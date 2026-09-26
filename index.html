@@ -868,15 +868,17 @@
                 
                 const planetsList = document.getElementById('transit-planets-list');
                 planetsList.innerHTML = '';
-                transitData.planets.forEach(p => {
-                    const div = document.createElement('div');
-                    div.className = "flex justify-between items-center bg-slate-950 p-2.5 rounded border border-amber-500/20";
-                    div.innerHTML = `
-                        <span class="font-medium text-amber-200 flex items-center gap-1.5"><span>${getPlanetIcon(p.name)}</span> ${p.name}</span>
-                        <span class="text-amber-300 font-mono">${p.sign} ${p.sign_deg.toFixed(1)}° ${p.is_retrograde ? '(Rx)' : ''}</span>
-                    `;
-                    planetsList.appendChild(div);
-                });
+                if (transitData.planets) {
+                    transitData.planets.forEach(p => {
+                        const div = document.createElement('div');
+                        div.className = "flex justify-between items-center bg-slate-950 p-2.5 rounded border border-amber-500/20";
+                        div.innerHTML = `
+                            <span class="font-medium text-amber-200 flex items-center gap-1.5"><span>${getPlanetIcon(p.name)}</span> ${p.name}</span>
+                            <span class="text-amber-300 font-mono">${p.sign} ${p.sign_deg.toFixed(1)}° ${p.is_retrograde ? '(Rx)' : ''}</span>
+                        `;
+                        planetsList.appendChild(div);
+                    });
+                }
 
                 document.getElementById('transits-placeholder').classList.add('hidden');
                 document.getElementById('transits-result').classList.remove('hidden');
@@ -896,21 +898,34 @@
         }
 
         async function handleCalculateSynastry() {
-            const nameA = document.getElementById('syn-a-name').value || "Persona A";
-            const nameB = document.getElementById('syn-b-name').value || "Persona B";
+            const nameA = document.getElementById('syn-a-name').value.trim() || "Persona A";
+            const nameB = document.getElementById('syn-b-name').value.trim() || "Persona B";
+
+            const yearA = parseInt(document.getElementById('syn-a-year').value);
+            const monthA = parseInt(document.getElementById('syn-a-month').value);
+            const dayA = parseInt(document.getElementById('syn-a-day').value);
+
+            const yearB = parseInt(document.getElementById('syn-b-year').value);
+            const monthB = parseInt(document.getElementById('syn-b-month').value);
+            const dayB = parseInt(document.getElementById('syn-b-day').value);
+
+            if (!yearA || !monthA || !dayA || !yearB || !monthB || !dayB) {
+                alert("Por favor completa los datos de fecha para ambas personas en la Sinastría.");
+                return;
+            }
 
             const payloadA = {
-                year: parseInt(document.getElementById('syn-a-year').value),
-                month: parseInt(document.getElementById('syn-a-month').value),
-                day: parseInt(document.getElementById('syn-a-day').value),
+                year: yearA,
+                month: monthA,
+                day: dayA,
                 hour: parseTimeToDecimal(document.getElementById('syn-a-time').value),
                 lat: currentLat, lon: currentLon
             };
 
             const payloadB = {
-                year: parseInt(document.getElementById('syn-b-year').value),
-                month: parseInt(document.getElementById('syn-b-month').value),
-                day: parseInt(document.getElementById('syn-b-day').value),
+                year: yearB,
+                month: monthB,
+                day: dayB,
                 hour: parseTimeToDecimal(document.getElementById('syn-b-time').value),
                 lat: currentLat, lon: currentLon
             };
@@ -953,9 +968,9 @@
         function drawSynastryWheel(synData) {
             const container = document.getElementById('synastry-wheel-container');
             if (!container) return;
-            const chartA = synData.chart_a;
-            const chartB = synData.chart_b;
-            const ascDeg = chartA.angles && chartA.angles.Ascendant ? chartA.angles.Ascendant.abs_deg : 0;
+            const chartA = synData.chart_a || {};
+            const chartB = synData.chart_b || {};
+            const ascDeg = (chartA.angles && chartA.angles.Ascendant) ? chartA.angles.Ascendant.abs_deg : 0;
             
             const size = 460;
             const center = size / 2;
@@ -1023,8 +1038,8 @@
 
             container.innerHTML = '';
             history.forEach(item => {
-                const sun = item.resultData.planets.find(p => p.name === 'Sun');
-                const asc = item.resultData.angles ? item.resultData.angles.Ascendant : null;
+                const sun = item.resultData.planets ? item.resultData.planets.find(p => p.name === 'Sun') : null;
+                const asc = (item.resultData.angles && item.resultData.angles.Ascendant) ? item.resultData.angles.Ascendant : null;
                 const card = document.createElement('div');
                 card.className = "bg-slate-950/80 border border-amber-500/30 p-4 rounded-xl flex flex-col justify-between space-y-3 shadow";
                 card.innerHTML = `
@@ -1077,22 +1092,24 @@
 
             const pBody = document.getElementById('planets-table-body');
             pBody.innerHTML = '';
-            data.planets.forEach(p => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-amber-500/5 transition-colors";
-                tr.innerHTML = `
-                    <td class="px-6 py-3 font-medium text-amber-100 flex items-center gap-2"><span>${getPlanetIcon(p.name)}</span><span>${p.name}</span></td>
-                    <td class="px-6 py-3 text-amber-300 font-medium">${p.sign}</td>
-                    <td class="px-6 py-3 font-mono text-slate-300">${p.sign_deg.toFixed(2)}°</td>
-                    <td class="px-6 py-3">${p.is_retrograde ? '<span class="text-xs bg-rose-950/80 text-rose-300 border border-rose-800 px-2 py-0.5 rounded">Rx</span>' : '<span class="text-xs text-amber-300/50">Directo</span>'}</td>
-                `;
-                pBody.appendChild(tr);
-            });
+            if (data.planets) {
+                data.planets.forEach(p => {
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-amber-500/5 transition-colors";
+                    tr.innerHTML = `
+                        <td class="px-6 py-3 font-medium text-amber-100 flex items-center gap-2"><span>${getPlanetIcon(p.name)}</span><span>${p.name}</span></td>
+                        <td class="px-6 py-3 text-amber-300 font-medium">${p.sign}</td>
+                        <td class="px-6 py-3 font-mono text-slate-300">${p.sign_deg.toFixed(2)}°</td>
+                        <td class="px-6 py-3">${p.is_retrograde ? '<span class="text-xs bg-rose-950/80 text-rose-300 border border-rose-800 px-2 py-0.5 rounded">Rx</span>' : '<span class="text-xs text-amber-300/50">Directo</span>'}</td>
+                    `;
+                    pBody.appendChild(tr);
+                });
+            }
         }
 
         function drawAstrologicalWheel(data) {
             const container = document.getElementById('chart-wheel-container');
-            const ascDeg = data.angles ? data.angles.Ascendant.abs_deg : 0;
+            const ascDeg = (data.angles && data.angles.Ascendant) ? data.angles.Ascendant.abs_deg : 0;
             const size = 460;
             const center = size / 2;
             const radius = 200;
