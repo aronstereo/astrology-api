@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -191,7 +191,7 @@
         <div class="flex items-center gap-2 flex-wrap">
 
             <div class="flex items-center gap-1.5 bg-slate-900/90 px-3 py-1.5 rounded-xl border border-amber-500/30">
-                <span class="text-xs">🌐</span>
+                <span class="text-xs">🌌</span>
 
                 <select
                     id="langSwitch"
@@ -267,7 +267,7 @@
             id="tab-btn-transits"
             class="px-5 py-3 font-medium text-sm border-b-2 border-transparent text-slate-400 whitespace-nowrap"
         >
-            🌟 Tránsitos Actuales
+            🌌Ÿ Tránsitos Actuales
         </button>
 
         <button
@@ -275,7 +275,7 @@
             id="tab-btn-history"
             class="px-5 py-3 font-medium text-sm border-b-2 border-transparent text-slate-400 whitespace-nowrap"
         >
-            📁 Historial Guardado
+            📚 Historial Guardado
         </button>
 
         <button
@@ -283,7 +283,7 @@
             id="tab-btn-raw"
             class="px-5 py-3 font-medium text-sm border-b-2 border-transparent text-slate-400 whitespace-nowrap"
         >
-            🛠️ Respuesta JSON
+            🧾 Respuesta JSON
         </button>
 
     </div>
@@ -451,7 +451,7 @@
                                 onclick="searchLocation()"
                                 class="bg-slate-800 hover:bg-slate-700 border border-amber-500/30 px-3 py-2 rounded-xl"
                             >
-                                🔍
+                                🔮
                             </button>
 
                         </div>
@@ -544,7 +544,7 @@
                 <div class="mystic-card p-6 shadow-2xl flex flex-col items-center">
 
                     <h3 class="font-semibold text-amber-200 self-start mb-4 border-b border-amber-500/20 pb-2 w-full">
-                        🔮 Rueda Astrológica
+                        🔮® Rueda Astrológica
                     </h3>
 
                     <div
@@ -563,7 +563,7 @@
 
                     <div class="px-6 py-4 border-b border-amber-500/20">
                         <h3 class="font-semibold text-amber-200">
-                            🪐 Posiciones Planetarias
+                            🪐 Posiciones Planetarias
                         </h3>
                     </div>
 
@@ -778,7 +778,7 @@
 
                 <div>
                     <h2 class="text-lg font-semibold text-amber-200">
-                        🌟 Clima Astrológico y Tránsitos de Hoy
+                        🌌Ÿ Clima Astrológico y Tránsitos de Hoy
                     </h2>
 
                     <p class="text-xs text-amber-300/70">
@@ -791,7 +791,7 @@
                     id="btn-transits"
                     class="bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold px-5 py-2.5 rounded-xl text-xs"
                 >
-                    🔄 Calcular Tránsitos de Hoy
+                    🔮„ Calcular Tránsitos de Hoy
                 </button>
 
             </div>
@@ -820,7 +820,7 @@
                     <div class="bg-slate-950/70 p-5 rounded-xl border border-amber-500/20">
 
                         <h3 class="font-bold text-amber-200 text-sm mb-3">
-                            🪐 Planetas en Tránsito
+                            🪐 Planetas en Tránsito
                         </h3>
 
                         <div
@@ -834,7 +834,7 @@
                     <div class="bg-slate-950/70 p-5 rounded-xl border border-amber-500/20">
 
                         <h3 class="font-bold text-amber-200 text-sm mb-3">
-                            ⚡ Influencia Energética
+                            ⚠¡ Influencia Energética
                         </h3>
 
                         <div
@@ -874,14 +874,14 @@
             <div class="flex justify-between items-center border-b border-amber-500/20 pb-3">
 
                 <h2 class="text-lg font-semibold text-amber-200">
-                    📁 Registros Astrológicos Guardados
+                    📚 Registros Astrológicos Guardados
                 </h2>
 
                 <button
                     onclick="clearHistory()"
                     class="text-xs bg-rose-950/60 hover:bg-rose-900 text-rose-300 border border-rose-800 px-3 py-1.5 rounded-xl"
                 >
-                    🗑️ Borrar Historial
+                    🗑️ Borrar Historial
                 </button>
 
             </div>
@@ -1100,47 +1100,59 @@ function extractCompatibilityScore(data) {
 
 function extractMetrics(data) {
 
+    if (!data || typeof data !== "object") {
+        return [];
+    }
+
+    /*
+       La API actual devuelve:
+
+       compatibility: {
+           percentage,
+           emotional,
+           communication,
+           love,
+           sexual,
+           stability
+       }
+    */
+
     const source =
+        data.compatibility ||
         data.metrics ||
         data.compatibility_metrics ||
         data.analysis?.metrics ||
         data.result?.metrics ||
         {};
 
-    const result = [];
-
     const definitions = [
-
-        {
-            keys: ["communication", "communication_score", "comunicacion"],
-            label: "Comunicación"
-        },
-
         {
             keys: ["emotional", "emotional_score", "emotion", "emocional"],
             label: "Conexión emocional"
         },
-
         {
-            keys: ["romance", "romantic", "romance_score", "romantica"],
-            label: "Romance"
+            keys: ["communication", "communication_score", "comunicacion"],
+            label: "Comunicación"
         },
-
+        {
+            keys: ["love", "love_score", "romance", "romantic", "romance_score", "romantica"],
+            label: "Amor"
+        },
         {
             keys: ["sexual", "sexual_score", "passion", "pasional"],
-            label: "Pasión"
+            label: "Atracción"
         },
-
         {
             keys: ["stability", "stability_score", "stable", "estabilidad"],
             label: "Estabilidad"
         },
-
         {
             keys: ["growth", "growth_score", "crecimiento"],
             label: "Crecimiento"
         }
     ];
+
+    const result = [];
 
     for (const definition of definitions) {
 
@@ -1148,12 +1160,12 @@ function extractMetrics(data) {
 
         for (const key of definition.keys) {
 
-            if (source[key] !== undefined) {
+            if (source[key] !== undefined && source[key] !== null) {
                 value = source[key];
                 break;
             }
 
-            if (data[key] !== undefined) {
+            if (data[key] !== undefined && data[key] !== null) {
                 value = data[key];
                 break;
             }
@@ -1165,7 +1177,7 @@ function extractMetrics(data) {
 
             if (Number.isFinite(numeric)) {
 
-                if (numeric <= 1) {
+                if (numeric >= 0 && numeric <= 1) {
                     numeric *= 100;
                 }
 
@@ -1180,22 +1192,61 @@ function extractMetrics(data) {
     return result;
 }
 
-
 /* ============================================================
    INTERPRETACIÓN
 ============================================================ */
 
 function extractInterpretation(data) {
 
+    if (!data || typeof data !== "object") {
+        return null;
+    }
+
+    const analysis = data.analysis;
+
+    if (analysis && typeof analysis === "object") {
+
+        const sections = [];
+
+        if (
+            typeof analysis.summary === "string" &&
+            analysis.summary.trim()
+        ) {
+            sections.push(
+                analysis.summary.trim()
+            );
+        }
+
+        const dimensions = [
+            ["emotional", "Conexión emocional"],
+            ["communication", "Comunicación"],
+            ["love", "Amor"],
+            ["sexual", "Atracción"],
+            ["long_term", "Estabilidad"]
+        ];
+
+        for (const [key, label] of dimensions) {
+
+            if (
+                typeof analysis[key] === "string" &&
+                analysis[key].trim()
+            ) {
+                sections.push(
+                    `${label}: ${analysis[key].trim()}`
+                );
+            }
+        }
+
+        if (sections.length) {
+            return sections.join("\n\n");
+        }
+    }
+
     const candidates = [
 
         data.interpretation,
         data.interpretation_text,
         data.analysis_text,
-
-        data.analysis?.interpretation,
-        data.analysis?.text,
-        data.analysis?.summary,
 
         data.result?.interpretation,
         data.result?.text,
@@ -1206,14 +1257,16 @@ function extractInterpretation(data) {
 
     for (const value of candidates) {
 
-        if (typeof value === "string" && value.trim()) {
+        if (
+            typeof value === "string" &&
+            value.trim()
+        ) {
             return value.trim();
         }
     }
 
     return null;
 }
-
 
 /* ============================================================
    ASPECTOS
@@ -1345,7 +1398,7 @@ const translations = {
         api: "API Conectada",
         chart: "Mapa Natal",
         synastry: "Sinastria",
-        transits: "Trânsitos",
+        transits: "Tránsitos",
         history: "Histórico",
         raw: "Resposta JSON"
     }
@@ -1361,9 +1414,9 @@ function changeLanguage(lang) {
 
     document.getElementById("tab-btn-chart").innerHTML = `📊 ${t.chart}`;
     document.getElementById("tab-btn-synastry").innerHTML = `💞 ${t.synastry}`;
-    document.getElementById("tab-btn-transits").innerHTML = `🌟 ${t.transits}`;
-    document.getElementById("tab-btn-history").innerHTML = `📁 ${t.history}`;
-    document.getElementById("tab-btn-raw").innerHTML = `🛠️ ${t.raw}`;
+    document.getElementById("tab-btn-transits").innerHTML = `🌌Ÿ ${t.transits}`;
+    document.getElementById("tab-btn-history").innerHTML = `📚 ${t.history}`;
+    document.getElementById("tab-btn-raw").innerHTML = `🧾 ${t.raw}`;
 }
 
 
@@ -1832,8 +1885,8 @@ function drawAstrologicalWheel(data) {
 
     const zodiacSymbols = [
         "♈","♉","♊","♋",
-        "♌","♍","♎","♏",
-        "♐","♑","♒","♓"
+        "♌","♏","♏","♏",
+        "♏","♏‘","♑","♒"
     ];
 
     const colors = [
@@ -2399,7 +2452,7 @@ function renderSynastryResult(
             <div class="bg-slate-950/70 rounded-xl border border-amber-500/20 p-5">
 
                 <h4 class="synastry-section-title">
-                    🔮 Interpretación
+                    🔮® Interpretación
                 </h4>
 
                 <div class="text-sm leading-7 text-slate-300 whitespace-pre-line">
@@ -2594,7 +2647,7 @@ function renderSynastryResult(
             <div class="bg-rose-950/40 border border-rose-800/50 rounded-xl p-5">
 
                 <h4 class="font-bold text-rose-300 text-sm mb-2">
-                    ⚠️ La API respondió, pero no devolvió un análisis interpretable.
+                    ⚠ ï¸ La API respondió, pero no devolvió un análisis interpretable.
                 </h4>
 
                 <p class="text-xs text-slate-400 leading-6">
@@ -2662,8 +2715,8 @@ function drawSynastryWheel(data) {
 
     const zodiacSymbols = [
         "♈","♉","♊","♋",
-        "♌","♍","♎","♏",
-        "♐","♑","♒","♓"
+        "♌","♏","♏","♏",
+        "♏","♏‘","♑","♒"
     ];
 
 
@@ -2909,8 +2962,8 @@ function getPlanetIcon(name) {
 
     const icons = {
 
-        Sun: "☀️",
-        Moon: "🌙",
+        Sun: "☀️",
+        Moon: "🌌™",
         Mercury: "☿",
         Venus: "♀",
         Mars: "♂",
@@ -2925,7 +2978,7 @@ function getPlanetIcon(name) {
         SouthNode: "☋"
     };
 
-    return icons[name] || "🪐";
+    return icons[name] || "🪐";
 }
 
 
@@ -3110,7 +3163,7 @@ async function calculateTransits() {
         button.disabled = false;
 
         button.textContent =
-            "🔄 Calcular Tránsitos de Hoy";
+            "🔮„ Calcular Tránsitos de Hoy";
     }
 }
 
@@ -3231,11 +3284,11 @@ function renderHistoryUI() {
 
                 <div class="text-xs text-amber-300/80">
 
-                    ☀️ ${escapeHtml(sun?.sign || "-")}
+                    ☀️ ${escapeHtml(sun?.sign || "-")}
 
                     |
 
-                    🌅 Asc:
+                    🌌… Asc:
                     ${escapeHtml(asc?.sign || "-")}
 
                 </div>
@@ -3247,7 +3300,7 @@ function renderHistoryUI() {
                 onclick="loadFromHistory(${item.id})"
                 class="w-full text-xs bg-slate-900 hover:bg-slate-800 text-amber-200 py-1.5 rounded-lg border border-amber-500/30"
             >
-                🔄 Cargar Datos
+                🔮„ Cargar Datos
             </button>
         `;
 
@@ -3462,7 +3515,7 @@ function handleWhatsAppAction() {
 
 
             text +=
-                "🌟 *Ejes Principales:*\n";
+                "🌌Ÿ *Ejes Principales:*\n";
 
 
             if (angles.Ascendant) {
@@ -3503,7 +3556,7 @@ function handleWhatsAppAction() {
         ) {
 
             text +=
-                "🪐 *Posiciones Planetarias:*\n";
+                "🪐 *Posiciones Planetarias:*\n";
 
 
             lastResponseData.planets
@@ -3552,7 +3605,7 @@ function handleWhatsAppAction() {
     ) {
 
         text +=
-            "🌟 *Clima Astrológico y Tránsitos*\n";
+            "🌌Ÿ *Clima Astrológico y Tránsitos*\n";
 
         text +=
             `• Fecha: ${lastTransitData.date}\n`;
@@ -3604,4 +3657,3 @@ document.addEventListener(
 
 </body>
 </html>
-```

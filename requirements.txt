@@ -3,5 +3,5 @@ uvicorn>=0.28.0
 pydantic>=2.0.0
 google-genai>=1.0.0
 python-dotenv>=1.0.1
-pysweph>=2.10.0
+pyswisseph>=2.10.0
 pytz>=2024.1
