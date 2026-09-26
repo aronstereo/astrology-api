@@ -568,7 +568,7 @@
                 btnCalculateSynastry: "Calcola Compatibilità di Coppia",
                 synastryWheelTitle: "Ruota di Sinastria (Doppio Anello)",
                 transitsMainTitle: "Clima Astrologico e Transiti di Oggi",
-                transitsSubtitle: "Analizza il movimento del cielo attuale e il suo impatto sul tuo tema natale.",
+                transitsSubtitle: "Analiza il movimento del cielo attuale e il suo impatto sul tuo tema natale.",
                 btnCalculateTransits: "🔄 Calcola i Transiti di Oggi",
                 transitDateLabel: "Data del Clima Attuale",
                 transitBadge: "✨ Ciclo Energetico Attivo",
@@ -1157,7 +1157,7 @@
                 html2canvas: { scale: 2, useCORS: true, logging: false },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
-            html2pdf().from(element).res(opt).save().then(() => {
+            html2pdf().from(element).set(opt).save().then(() => {
                 element.classList.remove('pdf-export-mode');
             }).catch(() => {
                 element.classList.remove('pdf-export-mode');
