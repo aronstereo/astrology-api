@@ -4,7 +4,7 @@ import os
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 from typing import List, Optional
 from google import genai
 from dotenv import load_dotenv
@@ -79,12 +79,42 @@ init_db()
 # ============================================================
 
 class ChartRequest(BaseModel):
-    year: int
-    month: int
-    day: int
-    hour: float
-    lat: Optional[float] = 0.0
-    lon: Optional[float] = 0.0
+    year: int = Field(ge=-1000, le=3002)
+    month: int = Field(ge=1, le=12)
+    day: int = Field(ge=1, le=31)
+    hour: float = Field(ge=0.0, lt=24.0)
+    lat: float = Field(default=0.0, ge=-90.0, le=90.0)
+    lon: float = Field(default=0.0, ge=-180.0, le=180.0)
+
+    @model_validator(mode="after")
+    def validate_calendar_date(self):
+        leap = (
+            self.year % 4 == 0
+            and (
+                self.year % 100 != 0
+                or self.year % 400 == 0
+            )
+        )
+
+        days_in_month = [
+            31,
+            29 if leap else 28,
+            31,
+            30,
+            31,
+            30,
+            31,
+            31,
+            30,
+            31,
+            30,
+            31,
+        ]
+
+        if self.day > days_in_month[self.month - 1]:
+            raise ValueError("Fecha de calendario no válida.")
+
+        return self
 
 
 class SynastryRequest(BaseModel):
@@ -367,7 +397,14 @@ def aspect_strength(aspect: dict) -> float:
         aspect.get("orb", 0)
     )
 
-    max_orb = 10.0
+    max_orb = next(
+        (
+            float(item["orb"])
+            for item in ephemeris.ASPECTS
+            if item["name"] == aspect_name
+        ),
+        10.0
+    )
 
     # 1.0 = aspecto exacto
     # 0.0 = aspecto fuera del rango útil

@@ -100,7 +100,7 @@ def calculate_natal_chart(year: int, month: int, day: int, hour: float, lat: flo
     try:
         houses_data = swe.houses(jd, lat, lon, b'P')
     except Exception:
-        houses_data = swe.houses(jd, lat, lon, ord('P'))
+        houses_data = swe.houses(jd, lat, lon, b'O')
 
     cusps = houses_data[0]
     ascmc = houses_data[1]

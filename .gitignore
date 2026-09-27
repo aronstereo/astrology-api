@@ -1,1 +1,19 @@
 .env
+
+# Entorno virtual local
+.venv311/
+
+# Python compilado
+__pycache__/
+*.pyc
+
+# Backups locales de auditoría
+*.backup-*
+
+# Scripts temporales de pruebas y auditoría
+*-test.js
+*-check.js
+
+# Scripts temporales de auditoría frontend
+index-*.js
+synastry-*.js
