@@ -440,7 +440,7 @@
                             <input
                                 type="text"
                                 id="city-search"
-                                placeholder="Ej: Barinas, Venezuela"
+                                data-i18n-placeholder="cityPlaceholder" placeholder="Ej: Barinas, Venezuela"
                                 class="w-full mystic-input px-3 py-2 text-sm"
                             >
 
@@ -465,14 +465,14 @@
                     <div class="grid grid-cols-2 gap-2 text-xs bg-slate-950/60 p-3 rounded-xl border border-amber-500/20">
 
                         <div>
-                            <span class="text-amber-300/60 block">Latitud:</span>
+                            <span class="text-amber-300/60 block" data-i18n="latitude"></span>
                             <span id="lat-val" class="font-mono text-amber-200 font-semibold">
                                 8.6200
                             </span>
                         </div>
 
                         <div>
-                            <span class="text-amber-300/60 block">Longitud:</span>
+                            <span class="text-amber-300/60 block" data-i18n="longitude"></span>
                             <span id="lon-val" class="font-mono text-amber-200 font-semibold">
                                 -70.2000
                             </span>
@@ -483,7 +483,7 @@
 
                     <button
                         type="submit"
-                        id="btn-submit" data-i18n="calculateChart"
+                        id="btn-submit"
                         class="w-full mt-4 bg-gradient-to-r from-amber-600 to-purple-700 hover:from-amber-500 hover:to-purple-600 text-amber-100 font-medium py-3 rounded-xl shadow-lg border border-amber-400/40"
                     >
                         <span data-i18n="calculateChart">Calcular Carta Natal</span>
@@ -611,7 +611,7 @@
         >
 
             <h2 class="text-lg font-semibold text-amber-200 border-b border-amber-500/20 pb-2">
-                <span data-i18n="advancedSynastry">💞 Comparativa de Sinastría Avanzada</span>
+                <span>💞</span> <span data-i18n="advancedSynastry">Comparativa de Sinastría Avanzada</span>
             </h2>
 
 
@@ -818,7 +818,7 @@
 
             <button
                 onclick="handleCalculateSynastry()"
-                id="btn-synastry-submit" data-i18n="calculateSynastry"
+                id="btn-synastry-submit"
                 class="w-full bg-gradient-to-r from-pink-700 to-amber-700 hover:from-pink-600 hover:to-amber-600 text-amber-100 font-bold py-3 px-4 rounded-xl shadow-lg border border-amber-400/30"
             >
                 <span data-i18n="calculateSynastry">Calcular Compatibilidad de Pareja</span>
@@ -841,7 +841,7 @@
             >
 
                 <h3 class="font-semibold text-amber-200 self-start mb-2">
-                    <span data-i18n="synastryWheel">💞 Rueda de Sinastría</span>
+                    <span>💞</span> <span data-i18n="synastryWheel">Rueda de Sinastría</span>
                 </h3>
 
                 <div
@@ -867,7 +867,7 @@
 
                 <div>
                     <h2 class="text-lg font-semibold text-amber-200">
-                        <span data-i18n="transitClimate">🌌 Clima Astrológico y Tránsitos de Hoy</span>
+                        <span>🌌</span> <span data-i18n="transitClimate">Clima Astrológico y Tránsitos de Hoy</span>
                     </h2>
 
                     <p class="text-xs text-amber-300/70">
@@ -1558,7 +1558,13 @@ const translations = {
             copyJson: "Copiar JSON",
             jsonCopied: "JSON copiado al portapapeles.",
 
+            cityPlaceholder: "Ej: Barinas, Venezuela",
+            latitude: "Latitud:",
+            longitude: "Longitud:",
+            searching: "Buscando...",
             connected: "API Conectada",
+            invalidCoordinates: "La ubicación seleccionada tiene coordenadas no válidas.",
+            selectBirthLocation: "Selecciona una ciudad o lugar de nacimiento antes de calcular la carta.",
             error: "Error",
 
             personA: "Persona A",
@@ -1672,7 +1678,13 @@ const translations = {
             deleteHistory: "Delete History",
             copyJson: "Copy JSON",
             jsonCopied: "JSON copied to clipboard.",
+            cityPlaceholder: "E.g.: Barinas, Venezuela",
+            latitude: "Latitude:",
+            longitude: "Longitude:",
+            searching: "Searching...",
             connected: "API Connected",
+            invalidCoordinates: "The selected location has invalid coordinates.",
+            selectBirthLocation: "Select a birth city or location before calculating the chart.",
             error: "Error",
             personA: "Person A",
             personB: "Person B",
@@ -1781,7 +1793,13 @@ const translations = {
             deleteHistory: "Cancella Cronologia",
             copyJson: "Copia JSON",
             jsonCopied: "JSON copiato negli appunti.",
+            cityPlaceholder: "Es.: Barinas, Venezuela",
+            latitude: "Latitudine:",
+            longitude: "Longitudine:",
+            searching: "Ricerca in corso...",
             connected: "API Connessa",
+            invalidCoordinates: "La posizione selezionata ha coordinate non valide.",
+            selectBirthLocation: "Seleziona una città o un luogo di nascita prima di calcolare il tema natale.",
             error: "Errore",
             personA: "Persona A",
             personB: "Persona B",
@@ -1890,7 +1908,13 @@ const translations = {
             deleteHistory: "Supprimer l'Historique",
             copyJson: "Copier le JSON",
             jsonCopied: "JSON copié dans le presse-papiers.",
+            cityPlaceholder: "Ex. : Barinas, Venezuela",
+            latitude: "Latitude :",
+            longitude: "Longitude :",
+            searching: "Recherche...",
             connected: "API Connectée",
+            invalidCoordinates: "Le lieu sélectionné a des coordonnées non valides.",
+            selectBirthLocation: "Sélectionnez une ville ou un lieu de naissance avant de calculer le thème natal.",
             error: "Erreur",
             personA: "Personne A",
             personB: "Personne B",
@@ -1999,7 +2023,13 @@ const translations = {
             deleteHistory: "Apagar Histórico",
             copyJson: "Copiar JSON",
             jsonCopied: "JSON copiado para a área de transferência.",
+            cityPlaceholder: "Ex.: Barinas, Venezuela",
+            latitude: "Latitude:",
+            longitude: "Longitude:",
+            searching: "Pesquisando...",
             connected: "API Conectada",
+            invalidCoordinates: "A localização selecionada tem coordenadas inválidas.",
+            selectBirthLocation: "Selecione uma cidade ou local de nascimento antes de calcular o mapa astral.",
             error: "Erro",
             personA: "Pessoa A",
             personB: "Pessoa B",
@@ -2525,7 +2555,7 @@ async function searchLocation() {
     if (!query) return;
 
     results.innerHTML =
-        `<div class="p-2 text-amber-200/70">Buscando...</div>`;
+        `<div class="p-2 text-amber-200/70">${getCurrentTranslations().ui.searching}</div>`;
 
     results.classList.remove("hidden");
 
@@ -2587,7 +2617,7 @@ async function searchLocation() {
                     lon < -180 ||
                     lon > 180
                 ) {
-                    alert("La ubicación seleccionada tiene coordenadas no válidas.");
+                    alert(getCurrentTranslations().ui.invalidCoordinates);
                     return;
                 }
 
@@ -2643,7 +2673,7 @@ async function searchSynastryLocation(person) {
     if (!query) return;
 
     results.innerHTML =
-        `<div class="p-2 text-amber-200/70">Buscando...</div>`;
+        `<div class="p-2 text-amber-200/70">${getCurrentTranslations().ui.searching}</div>`;
 
     results.classList.remove("hidden");
 
@@ -2706,7 +2736,7 @@ async function searchSynastryLocation(person) {
                     lon < -180 ||
                     lon > 180
                 ) {
-                    alert("La ubicación seleccionada tiene coordenadas no válidas.");
+                    alert(getCurrentTranslations().ui.invalidCoordinates);
                     return;
                 }
 
@@ -2758,7 +2788,7 @@ async function handleCalculate(event) {
     event.preventDefault();
 
     if (!locationSelected) {
-        alert("Selecciona una ciudad o lugar de nacimiento antes de calcular la carta.");
+        alert(getCurrentTranslations().ui.selectBirthLocation);
         return;
     }
 
@@ -4467,7 +4497,7 @@ function renderHistoryUI() {
 
             <button
                 onclick="loadFromHistory(${item.id})"
-                data-i18n="loadData" class="w-full text-xs bg-slate-900 hover:bg-slate-800 text-amber-200 py-1.5 rounded-lg border border-amber-500/30"
+                class="w-full text-xs bg-slate-900 hover:bg-slate-800 text-amber-200 py-1.5 rounded-lg border border-amber-500/30"
             >
                 <span data-i18n="loadData">Cargar Datos</span>
             </button>
